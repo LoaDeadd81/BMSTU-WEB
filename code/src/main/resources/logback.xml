@@ -1,0 +1,11 @@
+<configuration>
+    <logger name="com.zaxxer.hikari" level="debug">
+        <appender-ref ref="mainAppender"/>
+    </logger>
+    <logger name="Exposed" level="debug">
+        <appender-ref ref="mainAppender"/>
+    </logger>
+    <logger name="mainLogger" level="debug">
+        <appender-ref ref="mainAppender"/>
+    </logger>
+</configuration>
