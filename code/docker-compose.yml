@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: "${DB_NAME}"
       PGDATA: "/home/postgres/pgdata"
     volumes:
-      - ../2. Init Database:/docker-entrypoint-initdb.d
-      - ./data:/home/postgres/pgdata
+      - ./db/init:/docker-entrypoint-initdb.d
+      - ./db/data:/home/postgres/pgdata
     ports:
       - "${DB_PORT}:5432"
