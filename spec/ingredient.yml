@@ -1,0 +1,239 @@
+path:
+  /ingredients:
+    post:
+      tags:
+        - ingredient
+      summary: Create ingredient
+      operationId: sroreIngredients
+      requestBody:
+        $ref: "#/components/requestBodies/post"
+        required: true
+      responses:
+        201:
+          $ref: "#/components/responses/201"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+    get:
+      tags:
+        - ingredient
+      summary: Get ingredients
+      operationId: indexIngredients
+      responses:
+        200:
+          $ref: "#/components/responses/200Index"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+  /ingredients/{id}:
+    get:
+      tags:
+        - ingredient
+      summary: Ger ingredient
+      operationId: showIngredient
+      responses:
+        200:
+          $ref: "#/components/responses/200Show"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        404:
+          $ref: "status.yml#/components/responses/404"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+    put:
+      tags:
+        - ingredient
+      summary: Update ingredient
+      operationId: updateIngredient
+      requestBody:
+        $ref: "#/components/requestBodies/put"
+        required: true
+      responses:
+        204:
+          $ref: "status.yml#/components/responses/204"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        404:
+          $ref: "status.yml#/components/responses/404"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+    delete:
+      tags:
+        - ingredient
+      summary: Dlete ingredient
+      operationId: deleteIngredient
+      responses:
+        204:
+          $ref: "status.yml#/components/responses/204"
+        404:
+          $ref: "status.yml#/components/responses/404"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+    parameters:
+      - $ref: "parameters.yml#/components/parameters/id"
+
+components:
+  schemas:
+    createIngredient:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "name"
+        type:
+          $ref: "#/components/schemas/ingredientType"
+        nutritionalValue:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 1
+
+    getIngredient:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 1
+        name:
+          type: string
+          example: "name"
+        type:
+          $ref: "#/components/schemas/ingredientType"
+        nutritionalValue:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 1
+
+    updateIngredient:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "name"
+        type:
+          $ref: "#/components/schemas/ingredientType"
+        nutritionalValue:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 1
+
+    ingredientType:
+      type: string
+      enum:
+        - MEAT
+        - HORTICULTURAL_PROD
+        - TASTE_PROD
+        - FATS
+        - MILK_PROD
+        - CONFECTIONERY
+        - GRAIN
+        - FISH
+        - EGGS
+      example: EGGS
+
+    createIngredientInStage:
+      type: object
+      properties:
+        ingredient_id:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 1
+        amount:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 1
+        processingType:
+          $ref: "#/components/schemas/processingType"
+    
+    getIngredientInStage:
+      type: object
+      properties:
+        ingredient_id:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 1
+        name:
+          type: string
+          example: "name"
+        type:
+          $ref: "#/components/schemas/ingredientType"
+        amount:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 1
+        nutritionalValue:
+          type: integer
+          format: int32
+          minimum: 1
+          example: 1
+        processingType:
+          $ref: "#/components/schemas/processingType"
+    
+    processingType:
+      type: string
+      enum:
+        - WASH
+        - DRY
+        - CLEAR
+        - CUT
+        - MIX
+        - BOIL
+        - FRY
+        - BAKE
+        - PUT_OUT
+      example: WASH
+  
+
+  requestBodies:
+    post:
+      content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createIngredient"
+    
+    put:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/updateIngredient"
+
+  
+  responses:
+    200Index:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/getIngredient"
+
+    200Show:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/getIngredient"
+
+    201:
+      description: Successful operation
+      headers:
+        Location:
+          description: URI of created ingredient
+          schema:
+            type: string
+            format: URI
+            example: http://localhost:8080/api/v1/ingredients/1

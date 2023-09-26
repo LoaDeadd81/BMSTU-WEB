@@ -1,0 +1,46 @@
+path:
+  /auth/login:
+      post:
+        tags:
+          - auth
+        summary: Login
+        requestBody:
+          $ref: "user.yml#/components/requestBodies/post"
+          required: true
+        responses:
+          200:
+            $ref: "status.yml#/components/responses/200"
+          400:
+            $ref: "status.yml#/components/responses/400"
+          401:
+            $ref: "status.yml#/components/responses/401"
+          500:
+            $ref: "status.yml#/components/responses/500"
+
+
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Register
+      description: Register
+      requestBody:
+        $ref: "user.yml#/components/requestBodies/post"
+        required: true
+      responses:
+        200:
+          $ref: "status.yml#/components/responses/200"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        500:
+         $ref: "status.yml#/components/responses/500"
+
+
+  /auth/logout:
+    delete:
+      tags:
+        - auth
+      summary: Logout
+      responses:
+        204:
+          $ref: "status.yml#/components/responses/204"

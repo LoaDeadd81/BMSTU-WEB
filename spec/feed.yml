@@ -1,0 +1,27 @@
+path:
+  /feed:
+    get:
+      tags:
+        - feed
+      summary: Get feed
+      operationId: indexFeed
+      responses:
+        200:
+          $ref: "#/components/responses/200Index"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+
+
+components:
+  responses:
+    200Index:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "recipe.yml#/components/schemas/getRecipeFeed"

@@ -1,0 +1,11 @@
+components:
+  parameters:
+      id:
+        name: id
+        in: path
+        description: ID of resource
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1

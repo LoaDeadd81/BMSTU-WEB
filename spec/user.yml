@@ -1,0 +1,284 @@
+path:
+  /users:
+      post:
+        tags:
+          - user
+        summary: Create user
+        operationId: storeUser
+        requestBody:
+          $ref: "#/components/requestBodies/post"
+          required: true
+        responses:
+          201:
+            $ref: "#/components/responses/201"
+          500:
+            $ref: "status.yml#/components/responses/500"
+
+      get:
+        tags:
+          - user
+        summary: Get all users
+        operationId: indexUser
+        responses:
+          200:
+            $ref: "#/components/responses/200Index"
+          400:
+            $ref: "status.yml#/components/responses/400"
+          500:
+            $ref: "status.yml#/components/responses/500"
+
+
+  /users/{id}:
+    get:
+      tags:
+        - user
+      summary: Ger user
+      operationId: showUser
+      responses:
+        200:
+          $ref: "#/components/responses/200Show"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        404:
+          $ref: "status.yml#/components/responses/404"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+    put:
+      tags:
+        - user
+      summary: Update user
+      operationId: updateUser
+      requestBody:
+        $ref: "#/components/requestBodies/put"
+        required: true
+      responses:
+        204:
+          $ref: "status.yml#/components/responses/204"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        404:
+          $ref: "status.yml#/components/responses/404"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+    delete:
+      tags:
+        - user
+      summary: Dlete user
+      operationId: deleteUser
+      responses:
+        204:
+          $ref: "status.yml#/components/responses/204"
+        404:
+          $ref: "status.yml#/components/responses/404"
+        500:
+          $ref: "status.yml#/components/responses/500"
+    
+    patch:
+      tags:
+        - user
+      summary: Update credentials
+      operationId: patchUser
+      requestBody:
+        $ref: "#/components/requestBodies/patch"
+        required: true
+      responses:
+        200:
+          $ref: "#/components/responses/200Patch"
+        404:
+          $ref: "status.yml#/components/responses/404"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+    parameters:
+        - $ref: "parameters.yml#/components/parameters/id"
+
+  
+  /user-with-recipes/{id}:
+    get:
+      tags:
+        - user
+      summary: Get user data and all published user's recipes
+      operationId: indexUserPublishedRecipes
+      responses:
+        200:
+          $ref: "#/components/responses/200IndexUserRecipes"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        404:
+          $ref: "status.yml#/components/responses/404"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+    parameters:
+        - $ref: "parameters.yml#/components/parameters/id"
+
+    
+  /users/{id}/recipes:
+    get:
+      tags:
+        - user
+      summary: Get all user's recipes
+      operationId: indexUserRecipes
+      responses:
+        200:
+          $ref: "#/components/responses/200IndexRecipes"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        404:
+          $ref: "status.yml#/components/responses/404"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+    parameters:
+        - $ref: "parameters.yml#/components/parameters/id"
+
+
+  /users/{id}/recipes-saved:
+    get:
+      tags:
+        - user
+      summary: Get all saved user's recipes
+      operationId: indexUserSavedRecipes
+      responses:
+        200:
+          $ref: "#/components/responses/200IndexRecipes"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        404:
+          $ref: "status.yml#/components/responses/404"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+    parameters:
+        - $ref: "parameters.yml#/components/parameters/id"
+
+
+
+components:
+  schemas:
+    createUser:
+      type: object
+      required:
+        - login
+        - password
+      properties:
+        login:
+          type: string
+          example: "login"
+        password:
+          type: string
+          format: password
+          example: "password"
+
+    getUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+          example: 1
+        login:
+          type: string
+          example: "login"
+        isAdmin:
+          type: boolean
+          example: true
+
+    updateUser:
+      type: object
+      required:
+        - login
+        - password
+        - isAdmin
+      properties:
+        login:
+          type: string
+          example: "login"
+        password:
+          type: string
+          format: password
+          example: "password"
+        isAdmin:
+          type: boolean
+          example: true
+
+
+  requestBodies:
+    post:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/createUser"
+
+    put:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/updateUser"
+
+    patch:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/createUser"
+
+
+  responses:
+    200Index:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/getUser"
+
+    200Show:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/getUser"
+
+    200Patch:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/getUser"
+
+    200IndexRecipes:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "recipe.yml#/components/schemas/getRecipeFeed"
+
+    200IndexUserRecipes:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+            user:
+              $ref: "#/components/schemas/getUser"
+            recipes:
+              type: array
+              items:
+                $ref: "recipe.yml#/components/schemas/getRecipeFeed"
+
+    201:
+      description: Successful operation
+      headers:
+        Location:
+          description: URI of created user
+          schema:
+            type: string
+            format: URI
+            example: http://localhost:8080/api/v1/users/1

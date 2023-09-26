@@ -1,0 +1,69 @@
+path:
+  /publish-queue:
+    get:
+      tags:
+        - publish-queue
+      summary: Get publish-queue
+      operationId: indexPublishQueue
+      responses:
+        200:
+          $ref: "#/components/responses/200Index"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+
+  /publish-queue/{id}/approved:
+    post:
+      tags:
+        - publish-queue
+      summary: Approve recipe publication
+      operationId: approveRecipePublication
+      responses:
+        201:
+          $ref: "#/components/responses/201"
+        204:
+          $ref: "status.yml#/components/responses/204"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+
+  /publish-queue/{id}/canceled:
+    delete:
+      tags:
+        - publish-queue
+      summary: Cancel recipe publication
+      operationId: cancelRecipePublication
+      responses:
+        204:
+          $ref: "status.yml#/components/responses/204"
+        400:
+          $ref: "status.yml#/components/responses/400"
+        500:
+          $ref: "status.yml#/components/responses/500"
+
+
+
+components:
+  responses:
+    200Index:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "recipe.yml#/components/schemas/getRecipeFeed"
+
+    201:
+      description: Successful operation
+      headers:
+        Location:
+          description: URI of created user
+          schema:
+            type: string
+            format: URI
+            example: http://localhost:8080/api/v1/recipe/1
