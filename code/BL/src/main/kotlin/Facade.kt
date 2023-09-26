@@ -89,16 +89,16 @@ class Facade(repositoryFactory: IRepositoryFactory) {
     }
 
     //Stage
-    fun updateStage(obj: Stage) {
+    fun updateStage(obj: Stage) { //todo delete
         StageManager.update(obj)
     }
 
-    fun deleteStage(id: ULong) {
+    fun deleteStage(id: ULong) { //todo delete
         StageManager.delete(id)
     }
 
     //User
-    fun createUser(obj: User) {
+    fun createUser(obj: User) { //todo delete
         UserManager.create(obj)
     }
 
@@ -125,7 +125,7 @@ class Facade(repositoryFactory: IRepositoryFactory) {
         AccountService.register(login, password)
     }
 
-    fun logIn(login: String, password: String): User = AccountService.logIN(login, password)
+    fun logIn(login: String, password: String): User = AccountService.logIN(login, password) //todo
 
     //feed
     fun getFeedSortedByDate(): List<RecipePreview> = FeedService.getSortedByDate()
