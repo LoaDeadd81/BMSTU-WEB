@@ -3,7 +3,10 @@ package da.repositories.factory
 import bl.repositories.factory.IRepositoryFactory
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import da.repositories.*
+import da.repositories.PgCommentRepository
+import da.repositories.PgIngredientRepository
+import da.repositories.PgRecipeRepository
+import da.repositories.PgUserRepository
 import io.github.cdimascio.dotenv.dotenv
 import org.jetbrains.exposed.sql.Database
 import org.slf4j.LoggerFactory
@@ -37,8 +40,6 @@ class PgRepositoryFactory(private val schemaRep: String) : IRepositoryFactory {
     override fun createIngredientRepository(): PgIngredientRepository = PgIngredientRepository()
 
     override fun createRecipeRepository(): PgRecipeRepository = PgRecipeRepository()
-
-    override fun createStageRepository(): PgStageRepository = PgStageRepository()
 
     override fun createUserRepository(): PgUserRepository = PgUserRepository()
 }

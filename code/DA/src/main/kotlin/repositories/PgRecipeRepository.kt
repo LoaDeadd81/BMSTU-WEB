@@ -136,27 +136,6 @@ class PgRecipeRepository : IRecipeRepository {
         }
     }
 
-//    private fun updateStage(obj: Stage, recipeId: ULong) {
-//        val dao = transaction {
-//            StageTable.new {
-//                time = obj.time.toInt()
-//                description = obj.description
-//                this.recipeId = EntityID(recipeId.toInt(), Users)
-//            }
-//        }
-//
-//        transaction {
-//            for (it in obj.ingredients) {
-//                IngredientListTable.new {
-//                    amount = it.amount.toInt()
-//                    processingType = it.processingType
-//                    ingredientId = EntityID(it.id.toInt(), Ingredients)
-//                    stageId = EntityID(obj.id.toInt(), Stages)
-//                }
-//            }
-//        }
-//    }
-
     override fun delete(id: ULong) {
         logger.trace("{} called with parameters {}", ::delete.name, id)
 
@@ -185,25 +164,18 @@ class PgRecipeRepository : IRecipeRepository {
     }
 
     override fun getAll(): List<Recipe> {
-        logger.trace("{} called", ::getAll.name)
-
-        return transaction {
-            RecipeTable.all().map { it.toEntity() }
-        }
+//        logger.trace("{} called", ::getAll.name)
+//
+//        return transaction {
+//            RecipeTable.all().map { it.toEntity() }
+//        }
+        TODO()
     }
 
     override fun exists(id: ULong): Boolean {
         logger.trace("{} called with parameters {}", ::exists.name, id)
 
         return transaction { RecipeTable.findById(id.toInt()) != null }
-    }
-
-    override fun getAllPreview(): List<RecipePreview> {
-        logger.trace("{} called", ::getAllPreview.name)
-
-        return transaction {
-            RecipePreviewTable.all().map { it.toEntity() }
-        }
     }
 
     override fun getOwnerID(id: ULong): ULong {
@@ -329,11 +301,5 @@ class PgRecipeRepository : IRecipeRepository {
         return transaction {
             PublishQueueTable.find { PublishQueue.recipe eq EntityID(id.toInt(), Recipes) }.firstOrNull() != null
         }
-    }
-
-    override fun addStage(recipeId: ULong, stage: Stage) {
-        logger.trace("{} called with parameters {}, {}", ::addStage.name, recipeId, stage)
-
-        createStage(stage, recipeId)
     }
 }

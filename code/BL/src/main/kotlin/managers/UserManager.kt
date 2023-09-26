@@ -109,17 +109,6 @@ object UserManager : ICRUDManager<User> {
         return repository.getPublishedRecipes(userID)
     }
 
-    fun changeRole(id: ULong, isAdmin: Boolean) {
-        logger.trace("{} called with parameters {}, {}", ::changeRole.name, id, isAdmin)
-
-        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!isAdmin(uId)) throw AccessDeniedException("Access denied")
-        if (!isExist(id)) throw NotExistingUserException("User not exists")
-
-        repository.changeRole(id, isAdmin)
-    }
-
-
     fun isAdmin(id: ULong): Boolean {
         logger.trace("{} called with parameters {}", ::isAdmin.name, id)
 

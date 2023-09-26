@@ -34,13 +34,14 @@ object IngredientManager : ICRUDManager<Ingredient> {
     }
 
     override fun read(id: ULong): Ingredient {
-        logger.trace("{} called with parameters {}", ::read.name, id)
-
-        if (!isExist(id)) {
-            throw NotExistingIngredientException("Ingredient not exists")
-        }
-
-        return repository.read(id)
+//        logger.trace("{} called with parameters {}", ::read.name, id)
+//
+//        if (!isExist(id)) {
+//            throw NotExistingIngredientException("Ingredient not exists")
+//        }
+//
+//        return repository.read(id)
+        TODO()
     }
 
     override fun update(obj: Ingredient) {
@@ -92,6 +93,12 @@ object IngredientManager : ICRUDManager<Ingredient> {
         return repository.exists(id)
     }
 
+    override fun validate(obj: Ingredient): Boolean {
+        logger.trace("{} called with parameters {}", ::validate.name, obj)
+
+        return obj.name.isNotEmpty() && obj.nutritionalValue > 0u
+    }
+
     fun findByName(name: String): Ingredient {
         logger.trace("{} called with parameters {}", ::findByName.name, name)
 
@@ -99,11 +106,5 @@ object IngredientManager : ICRUDManager<Ingredient> {
         if (tmp == null) {
             throw NotExistingIngredientException("Ingredient not exists")
         } else return tmp
-    }
-
-    override fun validate(obj: Ingredient): Boolean {
-        logger.trace("{} called with parameters {}", ::validate.name, obj)
-
-        return obj.name.isNotEmpty() && obj.nutritionalValue > 0u
     }
 }

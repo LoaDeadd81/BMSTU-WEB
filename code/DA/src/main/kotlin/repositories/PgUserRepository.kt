@@ -96,15 +96,6 @@ class PgUserRepository : IUserRepository {
         return transaction { UserTable.find { Users.login eq login }.firstOrNull() } == null
     }
 
-    override fun changeRole(id: ULong, isAdmin: Boolean) {
-        logger.trace("{} called with parameters {}, {}", ::changeRole.name, id, isAdmin)
-
-        transaction {
-            val dao = UserTable.findById(id.toInt()) ?: throw NotFoundInDBException("User with id = $id not found")
-            dao.isAdmin = isAdmin
-        }
-    }
-
     override fun isAdmin(id: ULong): Boolean {
         logger.trace("{} called with parameters {}", ::isAdmin.name, id)
 

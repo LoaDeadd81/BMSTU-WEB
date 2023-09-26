@@ -46,7 +46,8 @@ class TechRecipeController(facade: Facade) : IRecipeController(facade) {
             } else {
                 try {
                     val isInFavorite = facade.isInFavorite(uId, recipeId)
-                    if (facade.isOwner(uId, recipeId) || facade.isAdmin(uId)) {
+                    val isAdmin = AccountService.isCurrentUserAdmin()
+                    if (uId == recipe.owner.id || isAdmin == true) {
                         val req = view.printOwnerView(recipe, isInFavorite)
                         if (req == 0) break
                         handleOwnerReq(req, recipe, isInFavorite)

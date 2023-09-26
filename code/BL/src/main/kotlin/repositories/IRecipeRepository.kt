@@ -3,11 +3,9 @@ package bl.repositories
 import bl.entities.Comment
 import bl.entities.Recipe
 import bl.entities.RecipePreview
-import bl.entities.Stage
 
 interface IRecipeRepository : IRepository<Recipe> {
 
-    fun getAllPreview(): List<RecipePreview>
     fun getOwnerID(id: ULong): ULong
 
     fun addToFavorite(id: ULong, userID: ULong)
@@ -29,6 +27,4 @@ interface IRecipeRepository : IRepository<Recipe> {
     fun cancelPublication(id: ULong)
 
     fun isInPublishQueue(id: ULong): Boolean
-
-    fun addStage(recipeId: ULong, stage: Stage)
 }

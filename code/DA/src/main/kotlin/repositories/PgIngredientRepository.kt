@@ -25,13 +25,14 @@ class PgIngredientRepository : IIngredientRepository {
     }
 
     override fun read(id: ULong): Ingredient {
-        logger.trace("{} called with parameters {}", ::read.name, id)
-
-        return transaction {
-            IngredientTable.findById(id.toInt())?.toEntity()
-                ?: throw NotFoundInDBException("Ingredient with id = $id not found")
-
-        }
+//        logger.trace("{} called with parameters {}", ::read.name, id)
+//
+//        return transaction {
+//            IngredientTable.findById(id.toInt())?.toEntity()
+//                ?: throw NotFoundInDBException("Ingredient with id = $id not found")
+//
+//        }
+        TODO()
     }
 
     override fun update(obj: Ingredient) {

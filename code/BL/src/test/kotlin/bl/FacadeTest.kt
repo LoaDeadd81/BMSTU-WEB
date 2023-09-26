@@ -350,49 +350,6 @@ class RecipeTest {
         assertThrows<ValidationCommentException> { facade.addComment(1u, "", 1u) }
     }
 
-    @Test
-    @DisplayName("Is owner")
-    fun isOwner() {
-        val actual = facade.isOwner(0u, 0u)
-        val expected = true
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Isn't owner")
-    fun isNotOwner() {
-        val actual = facade.isOwner(1u, 0u)
-        val expected = false
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Add stage")
-    fun addStage() {
-        val expected = Stage(5u, 35u, "description5", IngredientInStageMockData.toList())
-        facade.addStage(1u, expected)
-        val actual1 = StageMockData[5]
-        val actual2 = RecipeMockData[1].stages[5]
-
-        assertAll("Add stage asserts", { assertEquals(expected, actual1) }, { assertEquals(expected, actual2) })
-    }
-
-    @Test
-    @DisplayName("Add stage, no recipe")
-    fun addStageNoRecipe() {
-        val tmp = Stage(5u, 35u, "description5", IngredientInStageMockData.toList())
-        assertThrows<NotExistingRecipeException> { facade.addStage(9u, tmp) }
-    }
-
-    @Test
-    @DisplayName("Add stage, not valid")
-    fun addNotValidStage() {
-        val tmp = Stage(5u, 35u, "", IngredientInStageMockData.toList())
-        assertThrows<ValidationStageException> { facade.addStage(1u, tmp) }
-    }
-
     companion object {
         @JvmStatic
         @BeforeAll
@@ -489,87 +446,7 @@ class PublishTest {
     }
 }
 
-class StageTest {
-
-    @Test
-    @DisplayName("Update Stage")
-    fun updateStage() {
-        val expected = StageMockData[1]
-        expected.description = "fixed1"
-        facade.updateStage(expected)
-        val actual = StageMockData[1]
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Update Stage, not exist")
-    fun updateStageNotExist() {
-        val tmp = Stage(9u, 31u, "description1", IngredientInStageMockData.toList())
-
-        assertThrows<NotExistingStageException> { facade.updateStage(tmp) }
-    }
-
-    @Test
-    @DisplayName("Update Stage, didn't passed validation")
-    fun updateNotValidStage() {
-        val tmp = Stage(1u, 31u, "", IngredientInStageMockData.toList())
-
-        assertThrows<ValidationStageException> { facade.updateStage(tmp) }
-    }
-
-    @Test
-    @DisplayName("Delete Stage")
-    fun deleteStage() {
-        val expected = "deleted"
-        facade.deleteStage(2u)
-        val actual = StageMockData[2].description
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Delete Stage, not exist")
-    fun deleteStageNotExist() {
-        assertThrows<NotExistingStageException> { facade.deleteStage(9u) }
-    }
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setUser() {
-            facade.logIn("login0", "password0")
-        }
-    }
-}
-
 class UserTest {
-
-    @Test
-    @DisplayName("Create User")
-    fun createUser() {
-        val expected = User(6u, "login6", "password6", false)
-        facade.createUser(expected)
-        val actual = UserMockData.find { it.login == "login6" }
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Create User, not uniq")
-    fun createUserNotUniq() {
-        val tmp = User(5u, "login0", "password0", false)
-
-        assertThrows<AlreadyExistingUserException> { facade.createUser(tmp) }
-    }
-
-    @Test
-    @DisplayName("Create User, didn't passed validation")
-    fun createNotValidUser() {
-        val tmp = User(5u, "", "", false)
-
-        assertThrows<ValidationUserException> { facade.createUser(tmp) }
-    }
 
     @Test
     @DisplayName("Get User")
@@ -636,37 +513,6 @@ class UserTest {
         val actual = facade.getAllUsers()
 
         assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Change user role")
-    fun changeUserRole() {
-        val expected = true
-        facade.changeUserRole(3u, true)
-        val actual = UserMockData[3].isAdmin
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Change user role, not exist")
-    fun changeUserRoleNotExist() {
-        assertThrows<NotExistingUserException> { facade.changeUserRole(9u, true) }
-    }
-
-    @Test
-    @DisplayName("Is admin")
-    fun isAdmin() {
-        val expected = true
-        val actual = facade.isAdmin(0u)
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Is admin, not exist")
-    fun isAdminNotExist() {
-        assertThrows<NotExistingUserException> { facade.isAdmin(9u) }
     }
 
     @Test

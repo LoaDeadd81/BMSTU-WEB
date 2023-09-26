@@ -33,11 +33,16 @@ object AccountService {
         }
     }
 
-
     fun getCurrentUserId(): ULong? {
         logger.trace("{} called", ::getCurrentUserId.name)
 
         return currentUser?.id
+    }
+
+    fun isCurrentUserAdmin(): Boolean? {
+        logger.trace("{} called", ::getCurrentUserId.name)
+
+        return currentUser?.isAdmin
     }
 
     fun clearUser() {

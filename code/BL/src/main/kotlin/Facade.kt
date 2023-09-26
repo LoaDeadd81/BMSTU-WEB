@@ -9,36 +9,31 @@ class Facade(repositoryFactory: IRepositoryFactory) {
         CommentManager.registerRepository(repositoryFactory.createCommentRepository())
         IngredientManager.registerRepository(repositoryFactory.createIngredientRepository())
         RecipeManager.registerRepository(repositoryFactory.createRecipeRepository())
-        StageManager.registerRepository(repositoryFactory.createStageRepository())
         UserManager.registerRepository(repositoryFactory.createUserRepository())
         FeedService.registerRepository(repositoryFactory.createRecipeRepository())
     }
 
-    //Comment
-    fun updateComment(obj: Comment) {
-        CommentManager.update(obj)
+    //Account
+    fun register(login: String, password: String) {
+        AccountService.register(login, password)
     }
 
-    fun deleteComment(id: ULong) {
-        CommentManager.delete(id)
+    fun logIn(login: String, password: String): User = AccountService.logIN(login, password) //todo
+
+    //User
+    fun getAllUsers(): List<User> = UserManager.getAll()
+    fun getUser(id: ULong) = UserManager.read(id)
+    fun updateUser(obj: User) {
+        UserManager.update(obj)
     }
 
-    //Ingredient
-    fun createIngredient(obj: Ingredient) {
-        IngredientManager.create(obj)
+    fun deleteUser(id: ULong) {
+        UserManager.delete(id)
     }
 
-    fun updateIngredient(obj: Ingredient) {
-        IngredientManager.update(obj)
-    }
-
-    fun deleteIngredient(id: ULong) {
-        IngredientManager.delete(id)
-    }
-
-    fun findByNameIngredient(name: String) = IngredientManager.findByName(name)
-
-    fun getAllIngredients(): List<Ingredient> = IngredientManager.getAll()
+    fun getOwnFeed(id: ULong): List<RecipePreview> = UserManager.getOwnRecipes(id)
+    fun getSavedFeed(id: ULong): List<RecipePreview> = UserManager.getSavedRecipes(id)
+    fun getUserPublishedRecipes(id: ULong): List<RecipePreview> = UserManager.getPublishedRecipes(id)
 
     //Recipe
     fun createRecipe(obj: Recipe) {
@@ -54,6 +49,10 @@ class Facade(repositoryFactory: IRepositoryFactory) {
         RecipeManager.delete(id)
     }
 
+    fun addComment(userID: ULong, text: String, recipeID: ULong) {
+        RecipeManager.addComment(userID, text, recipeID)
+    }
+
     fun addToFavorite(userID: ULong, recipeID: ULong) {
         RecipeManager.addToFavorite(recipeID, userID)
     }
@@ -62,73 +61,50 @@ class Facade(repositoryFactory: IRepositoryFactory) {
         RecipeManager.deleteFromFavorite(recipeID, userID)
     }
 
-    fun isInFavorite(userID: ULong, recipeID: ULong): Boolean = RecipeManager.isInFavorite(recipeID, userID)
-
-
-    fun addComment(userID: ULong, text: String, recipeID: ULong) {
-        RecipeManager.addComment(userID, text, recipeID)
-    }
-
-    fun isOwner(userID: ULong, recipeID: ULong): Boolean = RecipeManager.isOwner(recipeID, userID)
-    fun addStage(recipeID: ULong, stage: Stage) {
-        RecipeManager.addStage(recipeID, stage)
-    }
-
-    //Publish
-    fun getPublishQueue(): List<RecipePreview> = RecipeManager.getPublishQueue()
     fun addToPublishQueue(id: ULong) {
         RecipeManager.publish(id)
-    }
-
-    fun acceptRecipePublication(id: ULong) {
-        RecipeManager.approvePublication(id)
     }
 
     fun cancelRecipePublication(id: ULong) {
         RecipeManager.cancelRecipePublication(id)
     }
 
-    //Stage
-    fun updateStage(obj: Stage) { //todo delete
-        StageManager.update(obj)
+    fun isInFavorite(userID: ULong, recipeID: ULong): Boolean = RecipeManager.isInFavorite(recipeID, userID)
+
+
+    //Comment
+    fun updateComment(obj: Comment) {
+        CommentManager.update(obj)
     }
 
-    fun deleteStage(id: ULong) { //todo delete
-        StageManager.delete(id)
+    fun deleteComment(id: ULong) {
+        CommentManager.delete(id)
     }
 
-    //User
-    fun createUser(obj: User) { //todo delete
-        UserManager.create(obj)
-    }
-
-    fun getUser(id: ULong) = UserManager.read(id)
-
-    fun updateUser(obj: User) {
-        UserManager.update(obj)
-    }
-
-    fun deleteUser(id: ULong) {
-        UserManager.delete(id)
-    }
-
-    fun getAllUsers(): List<User> = UserManager.getAll()
-    fun changeUserRole(id: ULong, isAdmin: Boolean) {
-        UserManager.changeRole(id, isAdmin)
-    }
-
-    fun isAdmin(id: ULong): Boolean = UserManager.isAdmin(id)
-    fun getUserPublishedRecipes(id: ULong): List<RecipePreview> = UserManager.getPublishedRecipes(id)
-
-    //Account
-    fun register(login: String, password: String) {
-        AccountService.register(login, password)
-    }
-
-    fun logIn(login: String, password: String): User = AccountService.logIN(login, password) //todo
-
-    //feed
+    //Feed
     fun getFeedSortedByDate(): List<RecipePreview> = FeedService.getSortedByDate()
-    fun getSavedFeed(id: ULong): List<RecipePreview> = UserManager.getSavedRecipes(id)
-    fun getOwnFeed(id: ULong): List<RecipePreview> = UserManager.getOwnRecipes(id)
+
+    //Publish Queue
+    fun getPublishQueue(): List<RecipePreview> = RecipeManager.getPublishQueue()
+    fun acceptRecipePublication(id: ULong) {
+        RecipeManager.approvePublication(id)
+    }
+    //todo delete
+
+    //Ingredient
+    fun createIngredient(obj: Ingredient) {
+        IngredientManager.create(obj)
+    }
+
+    fun getAllIngredients(): List<Ingredient> = IngredientManager.getAll()
+    fun updateIngredient(obj: Ingredient) {
+        IngredientManager.update(obj)
+    }
+
+    fun findByNameIngredient(name: String) = IngredientManager.findByName(name) //todo
+    fun deleteIngredient(id: ULong) {
+        IngredientManager.delete(id)
+    }
+
+
 }

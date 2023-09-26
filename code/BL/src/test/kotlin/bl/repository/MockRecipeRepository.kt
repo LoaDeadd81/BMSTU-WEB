@@ -1,6 +1,9 @@
 package bl.repository
 
-import bl.entities.*
+import bl.entities.Comment
+import bl.entities.Recipe
+import bl.entities.RecipePreview
+import bl.entities.toRecipePreview
 import bl.repositories.IRecipeRepository
 
 class MockRecipeRepository : IRecipeRepository {
@@ -59,17 +62,10 @@ class MockRecipeRepository : IRecipeRepository {
 
     override fun isInPublishQueue(id: ULong): Boolean = PublishQueue.find { x -> x == id } != null
 
-    override fun addStage(recipeId: ULong, stage: Stage) {
-        StageMockData += stage
-        RecipeMockData[recipeId.toInt()].stages += stage
-    }
-
     override fun cancelPublication(id: ULong) {
         val lst = PublishQueue.toMutableList()
         lst.removeAt(lst.indexOf(id))
         PublishQueue = lst.toTypedArray()
     }
-
-    override fun getAllPreview(): List<RecipePreview> = RecipeMockData.map { it.toRecipePreview() }
 
 }

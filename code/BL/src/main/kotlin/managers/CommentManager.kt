@@ -1,7 +1,10 @@
 package bl.managers
 
 import bl.entities.Comment
-import bl.exceptions.*
+import bl.exceptions.AccessDeniedException
+import bl.exceptions.NotAuthorizedException
+import bl.exceptions.NotExistingCommentException
+import bl.exceptions.ValidationCommentException
 import bl.repositories.ICommentRepository
 import bl.repositories.IRepository
 import org.slf4j.LoggerFactory
@@ -16,28 +19,29 @@ object CommentManager : ICRUDManager<Comment> {
     }
 
     override fun create(obj: Comment) {
-        logger.trace("{} called with parameters {}", ::create.name, obj)
-
-
-        AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!isUniq(obj)) {
-            throw AlreadyExistingCommentException("Comment already exists")
-        }
-        if (!validate(obj)) {
-            throw ValidationCommentException("Comment failed validation")
-        }
-
-        repository.create(obj)
+//        logger.trace("{} called with parameters {}", ::create.name, obj)
+//
+//
+//        AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
+//        if (!isUniq(obj)) {
+//            throw AlreadyExistingCommentException("Comment already exists")
+//        }
+//        if (!validate(obj)) {
+//            throw ValidationCommentException("Comment failed validation")
+//        }
+//
+//        repository.create(obj)
     }
 
     override fun read(id: ULong): Comment {
-        logger.trace("{} called with parameters {}", ::read.name, id)
-
-        if (!isExist(id)) {
-            throw NotExistingCommentException("Comment not exists")
-        }
-
-        return repository.read(id)
+//        logger.trace("{} called with parameters {}", ::read.name, id)
+//
+//        if (!isExist(id)) {
+//            throw NotExistingCommentException("Comment not exists")
+//        }
+//
+//        return repository.read(id)
+        TODO()
     }
 
     override fun update(obj: Comment) {
@@ -72,9 +76,10 @@ object CommentManager : ICRUDManager<Comment> {
     }
 
     override fun getAll(): List<Comment> {
-        logger.trace("{} called", ::getAll.name)
-
-        return repository.getAll()
+//        logger.trace("{} called", ::getAll.name)
+//
+//        return repository.getAll()
+        TODO()
     }
 
     override fun isUniq(obj: Comment) = true

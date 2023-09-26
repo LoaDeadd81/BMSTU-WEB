@@ -36,10 +36,6 @@ class MockUserRepository : IUserRepository {
     override fun getOwnRecipes(userID: ULong): List<RecipePreview> =
         RecipeMockData.filter { x -> x.owner.id == userID }.map { it.toRecipePreview() }
 
-    override fun changeRole(id: ULong, isAdmin: Boolean) {
-        UserMockData[id.toInt()].isAdmin = isAdmin
-    }
-
     override fun isAdmin(id: ULong): Boolean = UserMockData[id.toInt()].isAdmin
 
     override fun getPublishedRecipes(userID: ULong): List<RecipePreview> =

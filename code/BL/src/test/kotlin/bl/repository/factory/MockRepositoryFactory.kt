@@ -1,7 +1,10 @@
 package bl.repository.factory
 
 import bl.repositories.factory.IRepositoryFactory
-import bl.repository.*
+import bl.repository.MockCommentRepository
+import bl.repository.MockIngredientRepository
+import bl.repository.MockRecipeRepository
+import bl.repository.MockUserRepository
 
 class MockRepositoryFactory : IRepositoryFactory {
     override fun createCommentRepository(): MockCommentRepository = MockCommentRepository()
@@ -9,8 +12,6 @@ class MockRepositoryFactory : IRepositoryFactory {
     override fun createIngredientRepository(): MockIngredientRepository = MockIngredientRepository()
 
     override fun createRecipeRepository(): MockRecipeRepository = MockRecipeRepository()
-
-    override fun createStageRepository(): MockStageRepository = MockStageRepository()
 
     override fun createUserRepository(): MockUserRepository = MockUserRepository()
 }

@@ -16,6 +16,7 @@ class TechApp(private val facade: Facade, controllerFactory: TechControllerFacto
     fun menu() {
         while (true) {
             val uId = AccountService.getCurrentUserId()
+            val isAdmin = AccountService.isCurrentUserAdmin()
             var req: Int
             if (uId == null) {
                 req = view.printUnAuthMenu()
@@ -23,7 +24,7 @@ class TechApp(private val facade: Facade, controllerFactory: TechControllerFacto
                 handleUnAuthReq(req)
                 println()
             } else {
-                if (facade.isAdmin(uId)) {
+                if (isAdmin == true) {
                     req = view.printAdminMenu()
                     if (req == 0) {
                         AccountService.clearUser()

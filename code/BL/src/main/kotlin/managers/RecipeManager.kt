@@ -26,7 +26,7 @@ object RecipeManager : ICRUDManager<Recipe> {
         if (!isUniq(obj)) throw AlreadyExistingRecipeException("Recipe already exists")
         if (!validate(obj)) throw ValidationRecipeException("Recipe failed validation")
         for (i in obj.stages) {
-            if (!StageManager.validate(i)) throw ValidationIngredientException("Stage failed validation")
+            if (!validateStage(i)) throw ValidationIngredientException("Stage failed validation")
         }
 
         repository.create(obj)
@@ -66,9 +66,10 @@ object RecipeManager : ICRUDManager<Recipe> {
     }
 
     override fun getAll(): List<Recipe> {
-        logger.trace("{} called", ::getAll.name)
-
-        return repository.getAll()
+//        logger.trace("{} called", ::getAll.name)
+//
+//        return repository.getAll()
+        TODO()
     }
 
     override fun isUniq(obj: Recipe) = true
@@ -84,6 +85,12 @@ object RecipeManager : ICRUDManager<Recipe> {
 
         return obj.name.isNotEmpty() && obj.description.isNotEmpty() && obj.time > 0u && obj.servingsNum > 0u &&
                 obj.stages.isNotEmpty()
+    }
+
+    private fun validateStage(obj: Stage): Boolean {
+        logger.trace("{} called with parameters {}", ::validateStage.name, obj)
+
+        return obj.time > 0u && obj.description.isNotEmpty()
     }
 
     fun getPublishQueue(): List<RecipePreview> {
@@ -175,17 +182,6 @@ object RecipeManager : ICRUDManager<Recipe> {
         if (!CommentManager.validate(comment)) throw ValidationCommentException("Comment failed validation")
 
         repository.addComment(userID, recipeID, comment)
-    }
-
-    fun addStage(recipeID: ULong, stage: Stage) {
-        logger.trace("{} called with parameters {}, {}", ::addStage.name, recipeID, stage)
-
-        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!UserManager.isAdmin(uId) && !isOwner(recipeID, uId)) throw AccessDeniedException("Access denied")
-        if (!StageManager.validate(stage)) throw ValidationStageException("Stage failed validation")
-        if (!isExist(recipeID)) throw NotExistingRecipeException("Recipe not exist")
-
-        repository.addStage(recipeID, stage)
     }
 
     private fun isInPublishQueue(id: ULong): Boolean {
