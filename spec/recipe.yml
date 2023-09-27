@@ -22,10 +22,37 @@ path:
       responses:
         200:
           $ref: "#/components/responses/200Index"
+        200NotFull:
+          $ref: "#/components/responses/200NotFull"
         400:
           $ref: "status.yml#/components/responses/400"
         500:
           $ref: "status.yml#/components/responses/500"
+      parameters:
+        - in: query
+          name: user_id
+          description: ID of user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            example: 1
+        - in: query
+          name: saved
+          description: filter for saved recipes
+          schema:
+            type: boolean
+            example: true
+        - in: query
+          name: state
+          description: state of recipe
+          schema:
+            $ref: "#/components/schemas/recipeState"
+        - in: query
+          name: full
+          schema:
+            type: boolean
+            example: true
 
 
   /recipes/{id}:
@@ -147,15 +174,17 @@ path:
     parameters:
       - $ref: "parameters.yml#/components/parameters/id"
 
-  /recipes/{id}/saved:
-    post:
+  
+  /recipes/{id}/comments/{comment_id}:
+    put:
       tags:
         - recipe
-      summary:  Save recipe
-      operationId: saveRecipe
+      summary: Update comment
+      operationId: updateComment
+      requestBody:
+        $ref: "#/components/requestBodies/putComment"
+        required: true
       responses:
-        201:
-          $ref: "#/components/responses/201"
         204:
           $ref: "status.yml#/components/responses/204"
         400:
@@ -168,56 +197,43 @@ path:
     delete:
       tags:
         - recipe
-      summary:  Delete recipe from saved
-      operationId: deleteSavedRecipe
+      summary: Dlete comment
+      operationId: deleteComment
       responses:
         204:
           $ref: "status.yml#/components/responses/204"
-        400:
-          $ref: "status.yml#/components/responses/400"
         404:
           $ref: "status.yml#/components/responses/404"
         500:
           $ref: "status.yml#/components/responses/500"
-          
-    parameters:
-      - $ref: "parameters.yml#/components/parameters/id"
-
-  /recipes/{id}/published:
-    post:
+    
+    patch:
       tags:
         - recipe
-      summary:  Publish recipe
-      operationId: publishRecipe
+      summary: Update text
+      operationId: patchComment
+      requestBody:
+        $ref: "#/components/requestBodies/patchComment"
+        required: true
       responses:
-        201:
-          $ref: "#/components/responses/201"
-        204:
-          $ref: "status.yml#/components/responses/204"
-        400:
-          $ref: "status.yml#/components/responses/400"
+        200:
+          $ref: "#/components/responses/200PatchComment"
         404:
           $ref: "status.yml#/components/responses/404"
         500:
           $ref: "status.yml#/components/responses/500"
 
-    delete:
-      tags:
-        - recipe
-      summary:  Cancel publish recipe
-      operationId: deletePublishRecipe
-      responses:
-        204:
-          $ref: "status.yml#/components/responses/204"
-        400:
-          $ref: "status.yml#/components/responses/400"
-        404:
-          $ref: "status.yml#/components/responses/404"
-        500:
-          $ref: "status.yml#/components/responses/500"
-          
     parameters:
-      - $ref: "parameters.yml#/components/parameters/id"
+        - $ref: "parameters.yml#/components/parameters/id"
+        - comment_id:
+            name: comment_id
+            in: path
+            description: ID of comment
+            required: true
+            schema:
+              type: integer
+              format: int64
+              minimum: 1
 
 
 
@@ -266,6 +282,16 @@ components:
               format: int64
               minimum: 1
               example: 1
+            state:
+              $ref: "#/components/schemas/recipeState"
+    
+    recipeState:
+      type: string
+      enum:
+        - CLOSE
+        - READY_TO_PUBLISH
+        - PUBLISHED
+      example: CLOSE
 
     getRecipe:
       type: object
@@ -317,6 +343,8 @@ components:
         is_saved:
           type: boolean
           example: true
+        state:
+              $ref: "#/components/schemas/recipeState"
     
     getRecipeFeed:
       type: object
@@ -370,6 +398,8 @@ components:
           example: 1
         pfc:
           $ref: "#/components/schemas/pfc"
+        state:
+          $ref: "#/components/schemas/recipeState"
     
     updateRecipeStages:
       type: object
@@ -430,6 +460,18 @@ components:
           schema:
             $ref: "comment.yml#/components/schemas/createComment"
 
+    putComment:
+      content:
+        application/json:
+          schema:
+            $ref: "comment.yml#/components/schemas/updateComment"
+    
+    patchComment:
+      content:
+        application/json:
+          schema:
+            $ref: "comment.yml#/components/schemas/patchComment"
+
 
   responses:
     200Index:
@@ -447,6 +489,22 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/getRecipe"
+
+    200NotFull:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/getRecipeFeed"
+
+    200PatchComment:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: "comment.yml#/components/schemas/getComment"
 
     201:
       description: Successful operation

@@ -12,12 +12,6 @@ tags:
     description: All about users
   - name: recipe
     description: All about recipes
-  - name: comment
-    description: All about comments
-  - name: feed
-    description: All about feed
-  - name: publish-queue
-    description: All about publish queue
   - name: ingredient
     description: All about ingredients
 paths:
@@ -32,15 +26,8 @@ paths:
     $ref: "user.yml#/path/~1users"
   /users/{id}:
     $ref: "user.yml#/path/~1users~1{id}"
-  /users/{id}/recipes:
-    $ref: "user.yml#/path/~1users~1{id}~1recipes"
-  /users/{id}/recipes-saved:
-    $ref: "user.yml#/path/~1users~1{id}~1recipes-saved"
-  /user-with-recipes/{id}:
-    $ref: "user.yml#/path/~1user-with-recipes~1{id}"
-
-  /feed:
-    $ref: "feed.yml#/path/~1feed"
+  /users/{id}/saved-recipes/{recipe_id}:
+    $ref: "user.yml#/path/~1users~1{id}~1saved-recipes~1{recipe_id}"
 
   /recipes:
     $ref: "recipe.yml#/path/~1recipes"
@@ -52,20 +39,8 @@ paths:
     $ref: "recipe.yml#/path/~1recipes~1{id}~1stages"
   /recipes/{id}/comments:
     $ref: "recipe.yml#/path/~1recipes~1{id}~1comments"
-  /recipes/{id}/saved:
-    $ref: "recipe.yml#/path/~1recipes~1{id}~1saved"
-  /recipes/{id}/published:
-    $ref: "recipe.yml#/path/~1recipes~1{id}~1published"
-
-  /comments/{id}:
-    $ref: "comment.yml#/path/~1comments~1{id}"
-
-  /publish-queue:
-    $ref: "publish_queue.yml#/path/~1publish-queue"
-  /publish-queue/{id}/approved:
-    $ref: "publish_queue.yml#/path/~1publish-queue~1{id}~1approved"
-  /publish-queue/{id}/canceled:
-    $ref: "publish_queue.yml#/path/~1publish-queue~1{id}~1canceled"
+  /recipes/{id}/comments/{comment_id}:
+    $ref: "recipe.yml#/path/~1recipes~1{id}~1comments~1{comment_id}"
 
   /ingredients:
     $ref: "ingredient.yml#/path/~1ingredients"

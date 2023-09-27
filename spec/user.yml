@@ -32,17 +32,25 @@ path:
     get:
       tags:
         - user
-      summary: Ger user
+      summary: Ger userdasd
       operationId: showUser
       responses:
         200:
           $ref: "#/components/responses/200Show"
+        200Full:
+          $ref: "#/components/responses/200IndexUserRecipes"
         400:
           $ref: "status.yml#/components/responses/400"
         404:
           $ref: "status.yml#/components/responses/404"
         500:
           $ref: "status.yml#/components/responses/500"
+      parameters:
+        - in: query
+          name: full
+          schema:
+            type: boolean
+            example: true
 
     put:
       tags:
@@ -95,55 +103,30 @@ path:
         - $ref: "parameters.yml#/components/parameters/id"
 
   
-  /user-with-recipes/{id}:
-    get:
+  /users/{id}/saved-recipes/{recipe_id}:
+    post:
       tags:
         - user
-      summary: Get user data and all published user's recipes
-      operationId: indexUserPublishedRecipes
+      summary: Add recipe to user favorite
+      operationId: likeUserRecipe
       responses:
-        200:
-          $ref: "#/components/responses/200IndexUserRecipes"
+        204:
+          $ref: "status.yml#/components/responses/204"
         400:
           $ref: "status.yml#/components/responses/400"
         404:
           $ref: "status.yml#/components/responses/404"
         500:
           $ref: "status.yml#/components/responses/500"
-
-    parameters:
-        - $ref: "parameters.yml#/components/parameters/id"
-
     
-  /users/{id}/recipes:
-    get:
+    delete:
       tags:
         - user
-      summary: Get all user's recipes
-      operationId: indexUserRecipes
+      summary: Delete recipe from user favorite
+      operationId: dislikeUserRecipe
       responses:
-        200:
-          $ref: "#/components/responses/200IndexRecipes"
-        400:
-          $ref: "status.yml#/components/responses/400"
-        404:
-          $ref: "status.yml#/components/responses/404"
-        500:
-          $ref: "status.yml#/components/responses/500"
-
-    parameters:
-        - $ref: "parameters.yml#/components/parameters/id"
-
-
-  /users/{id}/recipes-saved:
-    get:
-      tags:
-        - user
-      summary: Get all saved user's recipes
-      operationId: indexUserSavedRecipes
-      responses:
-        200:
-          $ref: "#/components/responses/200IndexRecipes"
+        204:
+          $ref: "status.yml#/components/responses/204"
         400:
           $ref: "status.yml#/components/responses/400"
         404:
@@ -260,7 +243,7 @@ components:
               $ref: "recipe.yml#/components/schemas/getRecipeFeed"
 
     200IndexUserRecipes:
-      description: Successful operation
+      description: Successful operation with all info
       content:
         application/json:
           schema:
