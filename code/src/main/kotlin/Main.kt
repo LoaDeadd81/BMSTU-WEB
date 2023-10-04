@@ -1,5 +1,6 @@
 package main
 
+import api.RestApi
 import bl.Facade
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
@@ -68,11 +69,15 @@ fun main() {
     try {
         val dotenv = dotenv()
         configLoggers(dotenv["LOG_LEVEL"])
-        val facade = Facade(PgRepositoryFactory(dotenv["MAIN_SCHEMA"]))
-        val controllerFactory = TechControllerFactory(facade)
-        val techApp = TechApp(facade, controllerFactory)
 
-        techApp.menu()
+//        val facade = Facade(PgRepositoryFactory(dotenv["MAIN_SCHEMA"]))
+//        val controllerFactory = TechControllerFactory(facade)
+//        val techApp = TechApp(facade, controllerFactory)
+//
+//        techApp.menu()
+
+        val api = RestApi()
+        api.run()
     } catch (e: HikariPool.PoolInitializationException) {
         println("Не удалось подключиться к БД")
         println(e.message)

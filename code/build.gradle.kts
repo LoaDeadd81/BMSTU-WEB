@@ -1,12 +1,5 @@
-//buildscript {
-//    dependencies {
-//        classpath("org.postgresql:postgresql:42.6.0")
-//        classpath("ch.qos.logback:logback-classic:1.4.6")
-//        classpath("io.github.cdimascio:dotenv-kotlin:6.4.1")
-//
-////        classpath(files("jar/HikariCP-4.0.3.jar"))
-//    }
-//}
+val logback_version: String by project
+val slf4j_version: String by project
 
 plugins {
     kotlin("jvm") version "1.8.0"
@@ -28,10 +21,11 @@ dependencies {
     implementation(project(":BL"))
     implementation(project(":DA"))
     implementation(project(":TechUi"))
+    implementation(project(":RestAPI"))
 
-    implementation("ch.qos.logback:logback-classic:1.4.6")
-    implementation("org.slf4j:slf4j-nop:1.7.30")
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("org.slf4j:slf4j-nop:$slf4j_version")
+    implementation("org.slf4j:slf4j-api:$slf4j_version")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
     implementation("com.zaxxer:HikariCP:4.0.3")
 

@@ -1,3 +1,3 @@
-rootProject.name = "untitled"
-include("BL", "DA", "TechUi")
+rootProject.name = "KApp"
+include("BL", "DA", "TechUi", "RestAPI")
 

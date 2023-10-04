@@ -1,3 +1,6 @@
+val logback_version: String by project
+val slf4j_version: String by project
+
 plugins {
     kotlin("jvm") version "1.8.0"
 }
@@ -9,14 +12,12 @@ repositories {
     mavenCentral()
 }
 
-
-
 dependencies {
     testImplementation(kotlin("test"))
 
-    implementation("ch.qos.logback:logback-classic:1.4.6")
-    implementation("org.slf4j:slf4j-nop:1.7.30")
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("org.slf4j:slf4j-nop:$slf4j_version")
+    implementation("org.slf4j:slf4j-api:$slf4j_version")
 }
 
 tasks.test {

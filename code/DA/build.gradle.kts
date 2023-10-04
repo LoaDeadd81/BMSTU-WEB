@@ -1,3 +1,7 @@
+val logback_version: String by project
+val slf4j_version: String by project
+
+
 buildscript {
     dependencies {
         classpath("org.postgresql:postgresql:42.6.0")
@@ -6,7 +10,6 @@ buildscript {
 
 plugins {
     kotlin("jvm") version "1.8.0"
-    application
     id("org.flywaydb.flyway") version "9.16.1"
 }
 
@@ -30,9 +33,9 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
     implementation("com.zaxxer:HikariCP:4.0.3")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
-    implementation("ch.qos.logback:logback-classic:1.4.6")
-    implementation("org.slf4j:slf4j-nop:1.7.30")
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("org.slf4j:slf4j-nop:$slf4j_version")
+    implementation("org.slf4j:slf4j-api:$slf4j_version")
     testImplementation("com.radcortez.flyway:flyway-junit5-extension:1.4.0")
 }
 
@@ -42,10 +45,6 @@ tasks.test {
 
 kotlin {
     jvmToolchain(19)
-}
-
-application {
-    mainClass.set("MainKt")
 }
 
 flyway {
