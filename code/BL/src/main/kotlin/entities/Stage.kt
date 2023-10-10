@@ -1,3 +1,9 @@
 package bl.entities
 
-data class Stage(val id: ULong, var time: ULong, var description: String, var ingredients: List<IngredientInStage>)
+data class Stage(
+    var id: Int,
+    var time: Int,
+    var description: String,
+    val orderNum: Int = 0,
+    var ingredients: List<IngredientInStage>
+)

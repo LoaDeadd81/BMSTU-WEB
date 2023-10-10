@@ -3,71 +3,73 @@ package da.repositories
 import bl.entities.Comment
 import bl.repositories.ICommentRepository
 import da.dao.CommentTable
+import da.dao.Recipes
 import da.dao.Users
-import da.exeption.NotFoundInDBException
+import da.dao.toEntity
+import da.exeption.NotFoundException
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 class PgCommentRepository : ICommentRepository {
     private val logger = LoggerFactory.getLogger("mainLogger")
 
-    override fun create(obj: Comment) {
-//        logger.trace("{} called with parameters {}", ::create.name, obj)
-//
-//        transaction {
-//            CommentTable.new {
-//                date = obj.date
-//                text = obj.text
-//                autorId = EntityID(obj.autor.id.toInt(), Users)
-//            }
-//        }
-    }
+    override fun create(userID: Int, text: String, recipeID: Int): Int {
+        logger.trace("{} called with parameters {}, {}, {}", ::create.name, userID, text, recipeID)
 
-    override fun read(id: ULong): Comment {
-//        logger.trace("{} called with parameters {}", ::read.name, id)
-//
-//        return transaction {
-//            CommentTable.findById(id.toInt())?.toEntity()
-//                ?: throw NotFoundInDBException("Comment with id = $id not found")
-//        }
-        TODO()
+        val dao = transaction {
+            CommentTable.new {
+                date = LocalDateTime.now()
+                this.text = text
+                autorId = EntityID(userID, Users)
+                this.recipeId = EntityID(recipeID, Recipes)
+            }
+        }
+
+        return dao.id.value
     }
 
     override fun update(obj: Comment) {
         logger.trace("{} called with parameters {}", ::update.name, obj)
 
         transaction {
-            val dao = CommentTable.findById(obj.id.toInt())
-                ?: throw NotFoundInDBException("Comment with id = ${obj.id} not found")
+            val dao = CommentTable.findById(obj.id)
+                ?: throw NotFoundException("Comment with id = ${obj.id} not found")
             dao.date = obj.date
             dao.text = obj.text
-            dao.autorId = EntityID(obj.autor.id.toInt(), Users)
+            dao.autorId = EntityID(obj.autor.id, Users)
         }
     }
 
-    override fun delete(id: ULong) {
+    override fun delete(id: Int) {
         logger.trace("{} called with parameters {}", ::delete.name, id)
 
         transaction {
-            CommentTable.findById(id.toInt())?.delete()
-                ?: throw NotFoundInDBException("Comment with id = $id not found")
+            CommentTable.findById(id)?.delete()
+                ?: throw NotFoundException("Comment with id = $id not found")
         }
     }
 
-    override fun getAll(): List<Comment> {
-//        logger.trace("{} called", ::getAll.name)
-//
-//        return transaction {
-//            CommentTable.all().map { it.toEntity() }
-//        }
-        TODO()
+    override fun updateText(id: Int, text: String): Comment {
+        logger.trace("{} called with parameters {}, {}", ::updateText.name, id, text)
+
+        transaction {
+            val dao = CommentTable.findById(id)
+                ?: throw NotFoundException("Comment with id = $id not found")
+            dao.text = text
+        }
+
+        return transaction {
+            CommentTable.findById(id)?.toEntity()
+                ?: throw NotFoundException("Comment with id = $id not found")
+        }
     }
 
-    override fun exists(id: ULong): Boolean {
-        logger.trace("{} called with parameters {}", ::exists.name, id)
-
-        return transaction { CommentTable.findById(id.toInt()) != null }
+    override fun getOwnerID(id: Int): Int {
+        return transaction {
+            CommentTable.findById(id)?.autor?.id?.value
+                ?: throw NotFoundException("Comment with id = $id not found")
+        }
     }
-
 }

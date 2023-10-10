@@ -1,3 +1,4 @@
 rootProject.name = "KApp"
-include("BL", "DA", "TechUi", "RestAPI")
+include("BL", "DA", "RestAPI")
+//include("BL", "DA")
 

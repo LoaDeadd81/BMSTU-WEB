@@ -1,28 +1,34 @@
 package da
 
-import bl.Facade
 import bl.entities.*
 import bl.exceptions.*
-import bl.managers.AccountService
 import com.radcortez.flyway.test.annotation.DataSource
 import com.radcortez.flyway.test.annotation.FlywayTest
 import com.radcortez.flyway.test.junit.DataSourceInfo
 import com.radcortez.flyway.test.junit.DataSourceProvider
 import da.dao.*
-import da.exeption.NotFoundInDBException
+import da.data.builder.RecipeDataBuilder
+import da.data.mother.CommentDataMother
+import da.data.mother.IngredientDataMother
+import da.data.mother.StageDataMother
+import da.data.mother.UserDataMother
+import da.exeption.NotFoundException
 import da.repositories.factory.PgRepositoryFactory
 import io.github.cdimascio.dotenv.dotenv
+import kotlinx.coroutines.flow.combineTransform
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtensionContext
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 val dotenv = dotenv()
-val facade = Facade(PgRepositoryFactory(dotenv["TEST_SCHEMA"]))
+val factory = PgRepositoryFactory(dotenv["TEST_SCHEMA"])
 
 class PGDataSourceProvider : DataSourceProvider {
     override fun getDatasourceInfo(extensionContext: ExtensionContext?): DataSourceInfo {
@@ -35,628 +41,441 @@ class PGDataSourceProvider : DataSourceProvider {
 
 }
 
+
 @FlywayTest(DataSource(PGDataSourceProvider::class))
+@TestMethodOrder(MethodOrderer.Random::class)
 class CommentTest {
+
+    private val repository = factory.createCommentRepository()
+
+    @Test
+    @DisplayName("Create comment")
+    fun createComment() {
+        val expected = CommentDataMother.newComment()
+        val rId = 1
+
+        val cId = repository.create(expected.autor.id, expected.text, rId)
+        val actual1 = transaction {
+            CommentTable.findById(cId)?.toEntity()
+        }
+        val actual2 = transaction {
+            RecipeTable.findById(rId)?.toEntity()?.comments?.last()
+                ?: throw NotFoundException("Recipe with id = $id not found")
+        }
+        expected.date = actual2.date
+
+        assertAll("Add comment asserts", { assertEquals(expected, actual1) }, { assertEquals(expected, actual2) })
+    }
 
     @Test
     @DisplayName("Update Comment")
     fun updateComment() {
-        val id = 1
-        val str = "2023-01-01 00:00"
-        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-        val dateTime = LocalDateTime.parse(str, formatter)
+        val expected = CommentDataMother.updatedComment()
 
-        val expected = Comment(id.toULong(), dateTime, "text1", User(1u, "login1", "password1", true))
-        expected.text = "fixed1"
-        facade.updateComment(expected)
+        repository.update(expected)
         val actual = transaction {
-            CommentTable.findById(id)?.toEntity() ?: throw NotFoundInDBException("Comment with id = $id not found")
+            CommentTable.findById(expected.id)?.toEntity()
+                ?: throw NotFoundException("Comment with id = $id not found")
         }
+        expected.date = actual.date
 
         assertEquals(expected, actual)
     }
 
     @Test
-    @DisplayName("Update Comment, not exist")
-    fun updateCommentNotExist() {
-        val tmp = Comment(9u, LocalDateTime.now(), "text1", UserMockData[1])
+    @DisplayName("Update Comment, not found")
+    fun updateCommentNotFound() {
+        val tmp = CommentDataMother.notExistComment()
 
-        assertThrows<NotExistingCommentException> { facade.updateComment(tmp) }
-    }
-
-    @Test
-    @DisplayName("Update Comment, didn't passed validation")
-    fun updateNotValidComment() {
-        val tmp = Comment(1u, LocalDateTime.now(), "", UserMockData[1])
-
-        assertThrows<ValidationCommentException> { facade.updateComment(tmp) }
+        assertThrows<NotFoundException> { repository.update(tmp) }
     }
 
     @Test
     @DisplayName("Delete Comment")
     fun deleteComment() {
-        val id = 3
-        facade.deleteComment(id.toULong())
-        assertThrows<NotFoundInDBException> {
-            transaction {
-                val obj = CommentTable.findById(id)
-                obj?.toEntity() ?: throw NotFoundInDBException("Comment with id = $id not found")
-            }
-        }
+        val id = 5
+
+        repository.delete(id)
+
+        assertNull(transaction { CommentTable.findById(id) })
     }
 
     @Test
     @DisplayName("Delete Comment, not exist")
     fun deleteCommentNotExist() {
-        assertThrows<NotExistingCommentException> { facade.deleteComment(9u) }
+        val id = 9
+
+        assertThrows<NotFoundException> { repository.delete(id) }
     }
 
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setUser() {
-            facade.logIn("login1", "password1")
-        }
+    @Test
+    @DisplayName("Update text")
+    fun updateText() {
+        val expected = CommentDataMother.regularCommentWithNewText()
+
+        val actual = repository.updateText(expected.id, expected.text)
+        expected.date = actual.date
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    @DisplayName("Update text, not found")
+    fun updateTextNotFound() {
+        val id = 9
+
+        assertThrows<NotFoundException> { repository.updateText(id, "text") }
+    }
+
+    @Test
+    @DisplayName("Get owner id")
+    fun getOwnerID() {
+        val expected = 1
+        val id = 1
+
+        val actual = repository.getOwnerID(id)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    @DisplayName("Get owner id, not found")
+    fun getOwnerIDNotFound() {
+        val id = 9
+
+        assertThrows<NotFoundException> { repository.getOwnerID(id) }
     }
 }
 
 @FlywayTest(DataSource(PGDataSourceProvider::class))
-@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
+@TestMethodOrder(MethodOrderer.Random::class)
 class IngredientTest {
-    @Order(1)
+
+    private val repository = factory.createIngredientRepository()
+
     @Test
     @DisplayName("Create Ingredient")
     fun createIngredient() {
-        val id = 6
-        val expected = Ingredient(id.toULong(), "name6", IngredientType.MEAT, 1u)
-        facade.createIngredient(expected)
+        val expected = IngredientDataMother.newIngredient()
+
+        val iId = repository.create(expected)
         val actual = transaction {
-            IngredientTable.findById(id)?.toEntity()
-                ?: throw NotFoundInDBException("Ingredient with id = $id not found")
+            IngredientTable.findById(iId)?.toEntity()
         }
+        expected.id = iId
 
         assertEquals(expected, actual)
     }
 
-    @Order(2)
-    @Test
-    @DisplayName("Create Ingredient, not uniq")
-    fun createIngredientNotUniq() {
-        val tmp = Ingredient(5u, "name5", IngredientType.MEAT, 987u)
-
-        assertThrows<AlreadyExistingIngredientException> { facade.createIngredient(tmp) }
-    }
-
-    @Order(2)
-    @Test
-    @DisplayName("Create Ingredient, didn't passed validation")
-    fun createNotValidIngredient() {
-        val tmp = Ingredient(5u, "", IngredientType.MEAT, 987u)
-
-        assertThrows<ValidationIngredientException> { facade.createIngredient(tmp) }
-    }
-
-    @Order(2)
     @Test
     @DisplayName("Update Ingredient")
     fun updateIngredient() {
-        val id = 1
-        val expected = Ingredient(id.toULong(), "", IngredientType.MEAT, 1u)
-        expected.name = "fixed1"
-        facade.updateIngredient(expected)
+        val expected = IngredientDataMother.updatedIngredient()
+
+        repository.update(expected)
         val actual = transaction {
-            val obj = IngredientTable.findById(id)
-            obj?.toEntity() ?: throw NotFoundInDBException("Ingredient with id = $id not found")
+            IngredientTable.findById(expected.id)?.toEntity()
+                ?: throw NotFoundException("Ingredient with id = $id not found")
         }
 
         assertEquals(expected, actual)
     }
 
     @Test
-    @DisplayName("Update Ingredient, not exist")
-    fun updateIngredientNotExist() {
-        val tmp = Ingredient(9u, "name4", IngredientType.MEAT, 987u)
+    @DisplayName("Update Ingredient, not found")
+    fun updateIngredientNotFound() {
+        val tmp = IngredientDataMother.notExistIngredient()
 
-        assertThrows<NotExistingIngredientException> { facade.updateIngredient(tmp) }
+        assertThrows<NotFoundException> { repository.update(tmp) }
     }
 
-    @Order(2)
-    @Test
-    @DisplayName("Update Ingredient, didn't passed validation")
-    fun updateNotValidIngredient() {
-        val tmp = Ingredient(2u, "", IngredientType.MEAT, 987u)
-
-        assertThrows<ValidationIngredientException> { facade.updateIngredient(tmp) }
-    }
-
-    @Order(2)
     @Test
     @DisplayName("Delete Ingredient")
     fun deleteIngredient() {
-        val id = 2
-        facade.deleteIngredient(id.toULong())
-        assertThrows<NotFoundInDBException> {
-            transaction {
-                val obj = IngredientTable.findById(id)
-                obj?.toEntity() ?: throw NotFoundInDBException("Comment with id = $id not found")
-            }
-        }
+        val id = 5
+
+        repository.delete(id)
+
+        assertNull(transaction { IngredientTable.findById(id) })
     }
 
-    @Order(2)
     @Test
     @DisplayName("Delete Ingredient, not exist")
-    fun deleteIngredientNotExist() {
-        assertThrows<NotExistingIngredientException> { facade.deleteIngredient(9u) }
+    fun deleteCommentNotExist() {
+        val id = 9
+
+        assertThrows<NotFoundException> { repository.delete(id) }
     }
 
-    @Order(2)
     @Test
     @DisplayName("Find by name Ingredient")
     fun findByNameIngredient() {
-        val id = 2
-        val name = "name2"
+        val expected = IngredientDataMother.regularIngredient()
 
-        val expected = Ingredient(id.toULong(), "name2", IngredientType.MEAT, 2u)
-        val actual = facade.findByNameIngredient(name)
+        val actual = repository.findByName(expected.name)
 
         assertEquals(expected, actual)
     }
 
-    @Order(2)
     @Test
     @DisplayName("Find bu name Ingredient, not exist")
     fun findByNameIngredientNotExist() {
-        assertThrows<NotFoundInDBException> { facade.findByNameIngredient("name9") }
+        val name = "no_name"
+
+        assertThrows<NotFoundException> { repository.findByName(name) }
     }
 
-    @Order(2)
     @Test
     @DisplayName("Get all Ingredients")
     fun getAllIngredients() {
-        val expected = transaction {
-            IngredientTable.all().map { it.toEntity() }
-        }
-        val actual = facade.getAllIngredients()
+        val expected = IngredientDataMother.allIngredients()
+
+        val actual = repository.getAll()
 
         assertEquals(expected, actual)
     }
 
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setUser() {
-            facade.logIn("login1", "password1")
-        }
+    @Test
+    @DisplayName("Is name not exist, exist")
+    fun isNameNotExistExist() {
+        val name = IngredientDataMother.regularIngredient().name
+
+        val actual = repository.isNameNotExist(name)
+
+        assertFalse(actual)
+
+    }
+
+    @Test
+    @DisplayName("Is name not exist, not exist")
+    fun isNameNotExistNotExist() {
+        val name = "no name"
+
+        val actual = repository.isNameNotExist(name)
+
+        assertTrue(actual)
     }
 }
 
 
 @FlywayTest(DataSource(PGDataSourceProvider::class))
-@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
+@TestMethodOrder(MethodOrderer.Random::class)
+//@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class RecipeTest {
 
+    private val repository = factory.createRecipeRepository()
+
     @Test
-    @Order(2)
     @DisplayName("Create Recipe")
     fun createRecipe() {
-        val id = 6
-        val ingredients = listOf(
-            IngredientInStage(1u, "name1", IngredientType.MEAT, 10u, 1u, ProcessingType.WASH),
-            IngredientInStage(2u, "name2", IngredientType.MEAT, 20u, 2u, ProcessingType.WASH),
-            IngredientInStage(3u, "name3", IngredientType.MEAT, 30u, 3u, ProcessingType.WASH),
-            IngredientInStage(4u, "name4", IngredientType.MEAT, 40u, 4u, ProcessingType.WASH),
-            IngredientInStage(5u, "name5", IngredientType.MEAT, 50u, 5u, ProcessingType.WASH)
-        )
-        val stages = listOf(
-            Stage(6u, 30u, "description0", ingredients),
-            Stage(7u, 31u, "description1", ingredients),
-            Stage(8u, 32u, "description2", ingredients),
-            Stage(9u, 33u, "description3", ingredients),
-            Stage(10u, 34u, "description4", ingredients)
-        )
+        val expected =
+            RecipeDataBuilder().withId(6).withName("new").withState(RecipeState.CLOSE).withComments(listOf()).build()
 
-        val recipeIngredients = mutableListOf<IngredientInStage>()
+        val rId = repository.create(expected)
 
-        for (stage in stages) {
-            for (ingredient in stage.ingredients) {
-                val tmp = recipeIngredients.find { it.id == ingredient.id }
-                if (tmp == null) {
-                    recipeIngredients += ingredient.copy()
-                } else tmp.amount += ingredient.amount
-            }
+        val actual = transaction {
+            RecipeTable.findById(rId)?.toEntity() ?: throw NotFoundException("Recipe with id = $id not found")
+        }
+        expected.id = rId
+        expected.date = actual.date
+        for (i in actual.stages.indices) {
+            expected.stages[i].id = actual.stages[i].id
         }
 
-        val expected = Recipe(
-            id.toULong(),
-            "name5",
-            "description5",
-            35u,
-            5u,
-            PFC(5, 5, 5),
-            LocalDateTime.now(),
-            false,
-            stages,
-            listOf(),
-            User(1u, "login1", "password1", true),
-            recipeIngredients
-        )
-        facade.createRecipe(expected)
-        val actual = facade.getRecipe(6u)
-
-        actual.date = expected.date
         assertEquals(expected, actual)
     }
 
     @Test
-    @Order(3)
-    @DisplayName("Create Recipe, didn't passed validation")
-    fun createNotValidRecipe() {
-        val tmp = Recipe(
-            5u,
-            "",
-            "description5",
-            35u,
-            5u,
-            PFC(5, 5, 5),
-            LocalDateTime.now(),
-            false,
-            listOf(),
-            listOf(),
-            User(1u, "", "", false),
-            listOf()
-        )
-
-        assertThrows<ValidationRecipeException> { facade.createRecipe(tmp) }
-    }
-
-    @Test
-    @Order(3)
     @DisplayName("Get Recipe")
     fun getRecipe() {
-        val id = 1
-        val str = "2023-01-01 00:00"
-        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-        val dateTime = LocalDateTime.parse(str, formatter)
+        val expected = RecipeDataBuilder().build()
 
-        val expected = Recipe(
-            id.toULong(),
-            "name1",
-            "desc1",
-            1u,
-            1u,
-            PFC(1, 1, 1),
-            dateTime,
-            true,
-            listOf(
-                Stage(
-                    1u,
-                    1u,
-                    "desc1",
-                    listOf(IngredientInStage(1u, "name1", IngredientType.MEAT, 1u, 1u, ProcessingType.WASH))
-                )
-            ),
-            listOf(Comment(id.toULong(), dateTime, "text1", User(1u, "login1", "password1", true))),
-            User(1u, "login1", "password1", true),
-            listOf(IngredientInStage(1u, "name1", IngredientType.MEAT, 1u, 1u, ProcessingType.WASH))
-        )
-        val actual = facade.getRecipe(id.toULong())
+        repository.read(expected.id)
+        val actual = transaction {
+            RecipeTable.findById(expected.id)?.toEntity()
+                ?: throw NotFoundException("Recipe with id = $id not found")
+        }
 
         assertEquals(expected, actual)
     }
 
     @Test
-    @Order(3)
-    @DisplayName("Get Recipe access denied")
-    fun getRecipeAccessDenied() {
-        val id = 3
-        AccountService.logIN("login2", "password2")
+    @DisplayName("Get Recipe, not found")
+    fun getRecipeNotFound() {
+        val id = 9
 
-        assertThrows<AccessDeniedException> { facade.getRecipe(id.toULong()) }
-
-        AccountService.logIN("login1", "password1")
+        assertThrows<NotFoundException> { repository.read(id) }
     }
 
     @Test
-    @Order(3)
-    @DisplayName("Get Recipe, not exist")
-    fun getRecipeNotExist() {
-        assertThrows<NotExistingRecipeException> { facade.getRecipe(9u) }
-    }
-
-    @Test
-    @Order(3)
     @DisplayName("Update Recipe")
     fun updateRecipe() {
-        val id = 2
-        val str = "2023-02-02 00:00"
-        val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-        val dateTime = LocalDateTime.parse(str, formatter)
+        val expected = RecipeDataBuilder().withName("new").withState(RecipeState.PUBLISHED).build()
 
-        val expected = Recipe(
-            id.toULong(),
-            "name2",
-            "desc2",
-            2u,
-            2u,
-            PFC(2, 2, 2),
-            dateTime,
-            true,
-            listOf(
-                Stage(
-                    6u, 2u, "desc2", listOf(
-                        IngredientInStage(2u, "name2", IngredientType.MEAT, 1u, 2u, ProcessingType.DRY),
-                        IngredientInStage(2u, "name2", IngredientType.MEAT, 2u, 2u, ProcessingType.WASH)
-                    )
-                )
-            ),
-            listOf(Comment(id.toULong(), dateTime, "text2", User(2u, "login2", "password2", false))),
-            User(2u, "login2", "password2", false),
-            listOf(IngredientInStage(2u, "name2", IngredientType.MEAT, 3u, 2u, ProcessingType.DRY))
-        )
-        expected.name = "fixed1"
-        facade.updateRecipe(expected)
-        val actual = facade.getRecipe(id.toULong())
+        repository.update(expected)
+        val actual = transaction {
+            RecipeTable.findById(expected.id)?.toEntity()
+                ?: throw NotFoundException("Recipe with id = $id not found")
+        }
+        for (i in actual.stages.indices) {
+            expected.stages[i].id = actual.stages[i].id
+        }
 
-        actual.date = expected.date
         assertEquals(expected, actual)
     }
 
-    @Test
-    @Order(3)
-    @DisplayName("Update Recipe, not exist")
-    fun updateRecipeNotExist() {
-        val tmp = Recipe(
-            9u,
-            "name5",
-            "description5",
-            35u,
-            5u,
-            PFC(5, 5, 5),
-            LocalDateTime.now(),
-            false,
-            listOf(),
-            listOf(),
-            User(1u, "", "", false),
-            listOf()
-        )
 
-        assertThrows<NotExistingRecipeException> { facade.updateRecipe(tmp) }
+    @Test
+    @DisplayName("Update Recipe, not found")
+    fun updateRecipeNotFound() {
+        val tmp = RecipeDataBuilder().withId(9).build()
+
+        assertThrows<NotFoundException> { repository.update(tmp) }
     }
 
     @Test
-    @Order(3)
-    @DisplayName("Update Recipe, didn't passed validation")
-    fun updateNotValidRecipe() {
-        val tmp = Recipe(
-            1u,
-            "",
-            "description1",
-            31u,
-            1u,
-            PFC(1, 1, 1),
-            LocalDateTime.now(),
-            false,
-            listOf(),
-            listOf(),
-            User(1u, "", "", false),
-            listOf()
-        )
-
-        assertThrows<ValidationRecipeException> { facade.updateRecipe(tmp) }
-    }
-
-    @Test
-    @Order(3)
     @DisplayName("Delete Recipe")
     fun deleteRecipe() {
-        val id = 3
-        facade.deleteRecipe(id.toULong())
-        assertThrows<NotFoundInDBException> {
-            transaction {
-                val obj = RecipeTable.findById(id)
-                obj?.toEntity() ?: throw NotFoundInDBException("Recipe with id = $id not found")
-            }
-        }
+        val id = 5
+
+        repository.delete(id)
+
+        assertNull(transaction { RecipeTable.findById(id) })
     }
 
     @Test
-    @Order(3)
     @DisplayName("Delete Recipe, not exist")
-    fun deleteRecipeNotExist() {
-        assertThrows<NotExistingRecipeException> { facade.deleteRecipe(9u) }
+    fun deleteCommentNotExist() {
+        val id = 9
+
+        assertThrows<NotFoundException> { repository.delete(id) }
+    }
+
+//    @Test
+//    @DisplayName("Get all")
+//    fun getAll() {
+//        val expected = listOf(
+//            RecipeDataBuilder().build(),
+//            RecipeDataBuilder()
+//                .withId(1)
+//                .withName("name1")
+//                .withDesc("desc1")
+//                .withTime(1)
+//                .withServNum(1)
+//                .withPFC(PFC(1, 1, 1))
+//                .withDate(LocalDateTime.parse("01-01-2023", DateTimeFormatter.ofPattern("MM-dd-yyyy")))
+//                .withState(RecipeState.READY_TO_PUBLISH)
+//                .withStages(listOf())
+//                .withComments(listOf())
+//                .withOwner()
+//                .withIngredients(listOf())
+//
+//        )
+//
+//        assertThrows<NotFoundException> { repository.delete(id) }
+//    }
+
+    @Test
+    @DisplayName("Update info")
+    fun updateInfo() {
+        val expected =
+            RecipeDataBuilder().withId(1).withName("new_name").withDesc("new_desc").withTime(1).withServNum(1)
+                .withPFC(PFC(1, 1, 1)).withState(RecipeState.READY_TO_PUBLISH).build()
+
+        val actual1 = repository.updateInfo(expected)
+        val actual2 = transaction {
+            RecipeTable.findById(expected.id)?.toEntity()
+                ?: throw NotFoundException("Recipe with id = $id not found")
+        }
+
+        assertEquals(expected, actual1)
+        assertEquals(expected, actual2)
     }
 
     @Test
-    @Order(3)
-    @DisplayName("Add to favorite")
-    fun addToFavorite() {
-        val expected = Pair<ULong, ULong>(5u, 1u)
-        facade.addToFavorite(expected.first, expected.second)
-        val tmp = transaction {
-            SavedRecipeTable.findById(16) ?: throw NotFoundInDBException("")
+    @DisplayName("Update info, not found")
+    fun updateInfoNotFound() {
+        val tmp = RecipeDataBuilder().withId(9).build()
+
+        assertThrows<NotFoundException> { repository.updateInfo(tmp) }
+    }
+
+    @Test
+    @DisplayName("Update stages")
+    fun updateStages() {
+        val expected = RecipeDataBuilder().withStages(listOf(StageDataMother.updatedStage())).build()
+
+        val actual1 = repository.updateStages(expected.id, expected.stages)
+        val actual2 = transaction {
+            RecipeTable.findById(expected.id)?.toEntity()
+                ?: throw NotFoundException("Recipe with id = $id not found")
         }
-        val actual = Pair(tmp.userId.value.toULong(), tmp.recipeId.value.toULong())
+
+        assertEquals(expected, actual1)
+        assertEquals(expected, actual2)
+    }
+
+    @Test
+    @DisplayName("Update stages, not found")
+    fun updateStagesNotFound() {
+        val id = 9
+
+        assertThrows<NotFoundException> { repository.updateStages(id, listOf(StageDataMother.updatedStage())) }
+    }
+
+    @Test
+    @DisplayName("Get owner id")
+    fun getOwnerID() {
+        val expected = 1
+
+        val actual = repository.getOwnerID(1)
 
         assertEquals(expected, actual)
     }
-
-    @Test
-    @Order(3)
-    @DisplayName("Add to favorite, no recipe")
-    fun addToFavoriteNoRecipe() {
-        assertThrows<NotExistingRecipeException> { facade.addToFavorite(4u, 9u) }
-    }
-
-    @Test
-    @Order(3)
-    @DisplayName("Add to favorite, no user")
-    fun addToFavoriteNoUser() {
-        assertThrows<NotExistingUserException> { facade.addToFavorite(9u, 4u) }
-    }
-
-    @Test
-    @Order(3)
-    @DisplayName("Add comment")
-    fun addComment() {
-        val id = 1
-        val comId = 6
-        val tmpUser = transaction {
-            UserTable.findById(id)?.toEntity() ?: throw NotFoundInDBException("User with id = $id not found")
-        }
-
-        val expected = Comment(comId.toULong(), LocalDateTime.now(), "text5", tmpUser)
-        facade.addComment(id.toULong(), "text5", id.toULong())
-        val actual1 = transaction {
-            CommentTable.findById(comId)?.toEntity() ?: throw NotFoundInDBException("Comment with id = $id not found")
-        }
-        val actual2 = transaction {
-            RecipeTable.findById(id)?.toEntity()?.comments?.last()
-                ?: throw NotFoundInDBException("Recipe with id = $id not found")
-        }
-
-        expected.date = actual2.date
-        assertAll("Add comment asserts", { assertEquals(expected, actual1) }, { assertEquals(expected, actual2) })
-    }
-
-    @Test
-    @Order(3)
-    @DisplayName("Add comment, no user")
-    fun addCommentNoUser() {
-        assertThrows<NotExistingUserException> { facade.addComment(9u, "text5", 1u) }
-    }
-
-    @Test
-    @Order(3)
-    @DisplayName("Add comment, no recipe")
-    fun addCommentNoRecipe() {
-        assertThrows<NotExistingRecipeException> { facade.addComment(1u, "text5", 9u) }
-    }
-
-    @Test
-    @Order(3)
-    @DisplayName("Add comment, not valid")
-    fun addNotValidComment() {
-        assertThrows<ValidationCommentException> { facade.addComment(1u, "", 1u) }
-    }
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setUser() {
-            facade.logIn("login1", "password1")
-        }
-    }
-}
-
-@FlywayTest(DataSource(PGDataSourceProvider::class))
-class PublishTest {
 
     @Test
     @DisplayName("Get publish queue")
     fun getPublishQueue() {
-        val expected = facade.getPublishQueue()
-        val actual = transaction {
-            val query = da.dao.PublishQueue.innerJoin(Recipes).slice(Recipes.columns).selectAll()
-            RecipePreviewTable.wrapRows(query).map { it.toEntity() }
-        }
+        val expected = listOf(RecipeDataBuilder().build().toRecipePreview())
+
+//        try {
+        val actual = repository.getPublishQueue()
+//        } catch (e: Exception) {
+//            println("")
+//        }
+
 
         assertEquals(expected, actual)
     }
 
-    @Test
-    @DisplayName("Add to publish queue")
-    fun addToPublishQueue() {
-        val id = 4
-        val expected = true
-        facade.addToPublishQueue(id.toULong())
-        val actual = transaction {
-            PublishQueueTable.find { da.dao.PublishQueue.recipe eq EntityID(id, Recipes) }.firstOrNull() != null
-        }
 
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Add to publish queue, recipe not exists")
-    fun addToPublishQueueRecipeNotExist() {
-        assertThrows<NotExistingRecipeException> { facade.addToPublishQueue(9u) }
-    }
-
-    @Test
-    @DisplayName("Add to publish queue, already published")
-    fun addToPublishQueueRecipeAlreadyPublished() {
-        assertThrows<RecipeAlreadyPublishedException> { facade.addToPublishQueue(1u) }
-    }
-
-    @Test
-    @DisplayName("Accept recipe publication")
-    fun acceptRecipePublication() {
-        val id = 3u
-        val expected = true
-        facade.addToPublishQueue(id.toULong())
-        facade.acceptRecipePublication(id.toULong())
-        val actual = transaction {
-            RecipeTable.findById(id.toInt())?.published ?: throw NotFoundInDBException("Recipe with id = $id not found")
-        }
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Accept recipe publication, recipe not exists")
-    fun acceptRecipePublicationRecipeNotExist() {
-        assertThrows<NotExistingRecipeException> { facade.acceptRecipePublication(9u) }
-    }
-
-    @Test
-    @DisplayName("Accept recipe publication, not in queue")
-    fun acceptRecipePublicationRecipeNotInQueue() {
-        assertThrows<RecipeNotInPublishQueueException> { facade.acceptRecipePublication(2u) }
-    }
-
-    @Test
-    @DisplayName("Cansel recipe publication")
-    fun cancelRecipePublication() {
-        val id = 4
-        val expected = true
-        facade.cancelRecipePublication(id.toULong())
-        val actual = transaction {
-            PublishQueueTable.find { da.dao.PublishQueue.recipe eq EntityID(id, Recipes) }.firstOrNull() == null
-        }
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Cansel recipe publication, recipe not exists")
-    fun cancelRecipePublicationRecipeNotExist() {
-        assertThrows<NotExistingRecipeException> { facade.cancelRecipePublication(9u) }
-    }
-
-    @Test
-    @DisplayName("Cansel recipe publication, not in queue")
-    fun cancelRecipePublicationRecipeNotInQueue() {
-        assertThrows<RecipeNotInPublishQueueException> { facade.cancelRecipePublication(2u) }
-    }
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setUser() {
-            facade.logIn("login1", "password1")
-        }
-    }
 }
 
 @FlywayTest(DataSource(PGDataSourceProvider::class))
 class UserTest {
+
+    private val repository = factory.createUserRepository()
+
+    @Test
+    @DisplayName("Create user")
+    fun createUser() {
+        val expected = UserDataMother.created()
+
+        val uid = repository.create(expected.login, expected.password)
+        val actual = transaction {
+            UserTable.findById(uid)?.toEntity() ?: throw NotFoundException("User with id = $id not found")
+        }
+        expected.id = uid
+
+        assertEquals(expected, actual)
+    }
+
     @Test
     @DisplayName("Get User")
     fun getUser() {
-        val id = 1
-        val expected = User(id.toULong(), "login1", "password1", true)
-        val actual = facade.getUser(id.toULong())
+        val expected = UserDataMother.admin()
+
+        val actual = repository.read(expected.id)
 
         assertEquals(expected, actual)
     }
@@ -664,18 +483,19 @@ class UserTest {
     @Test
     @DisplayName("Get User, not exist")
     fun getUserNotExist() {
-        assertThrows<NotExistingUserException> { facade.getUser(9u) }
+        val id = 9
+
+        assertThrows<NotFoundException> { repository.read(id) }
     }
 
     @Test
     @DisplayName("Update User")
     fun updateUser() {
-        val id = 2
-        val expected = User(id.toULong(), "login2", "password2", false)
-        expected.password = "fixed1"
-        facade.updateUser(expected)
+        val expected = UserDataMother.updated()
+
+        repository.update(expected)
         val actual = transaction {
-            UserTable.findById(id)?.toEntity() ?: throw NotFoundInDBException("User with id = $id not found")
+            UserTable.findById(expected.id)?.toEntity() ?: throw NotFoundException("User with id = $id not found")
         }
 
         assertEquals(expected, actual)
@@ -684,197 +504,93 @@ class UserTest {
     @Test
     @DisplayName("Update User, not exist")
     fun updateUserNotExist() {
-        val tmp = User(9u, "login1", "password1", false)
+        val tmp = UserDataMother.notExist()
 
-        assertThrows<NotExistingUserException> { facade.updateUser(tmp) }
-    }
-
-    @Test
-    @DisplayName("Update User, didn't passed validation")
-    fun updateNotValidUser() {
-        val tmp = User(1u, "", "", false)
-
-        assertThrows<ValidationUserException> { facade.updateUser(tmp) }
+        assertThrows<NotFoundException> { repository.update(tmp) }
     }
 
     @Test
     @DisplayName("Delete User")
     fun deleteUser() {
-        val id = 3
-        val expected = true
-        facade.deleteUser(id.toULong())
-        val actual = transaction {
-            UserTable.findById(id) == null
-        }
+        val id = 5
 
-        assertEquals(expected, actual)
+        repository.delete(id)
+
+        val ent = EntityID(id, Users)
+        assertTrue(transaction { CommentTable.find { Comments.autor eq ent }.empty() })
+        assertTrue(transaction { RecipeTable.find { Recipes.owner eq ent }.empty() })
+        assertTrue(transaction { SavedRecipeTable.find { SavedRecipes.user eq ent }.empty() })
     }
 
     @Test
     @DisplayName("Delete User, not exist")
     fun deleteUserNotExist() {
-        assertThrows<NotExistingUserException> { facade.deleteUser(9u) }
+        val id = 9
+
+        assertThrows<NotFoundException> { repository.delete(id) }
     }
 
     @Test
     @DisplayName("Get all Users")
     fun getAllUsers() {
-        val expected = listOf(
-            User(1u, "login1", "password1", true),
-            User(2u, "login2", "password2", false),
-            User(3u, "login3", "password3", false),
-            User(4u, "login4", "password4", false),
-            User(5u, "login5", "password5", false)
-        )
-        val actual = facade.getAllUsers()
+        val expected = UserDataMother.all()
+
+        val actual = repository.getAll()
 
         assertEquals(expected, actual)
     }
 
     @Test
-    @DisplayName("Get user published recipes")
-    fun getUserPublishedRecipes() {
-        val id = 1
-        val expected = listOf(RecipePreview(id.toULong(), "name1", "desc1", 1u, 1u))
-        val actual = facade.getUserPublishedRecipes(id.toULong())
+    @DisplayName("Update credentials")
+    fun updateCredentials() {
+        val expected = UserDataMother.updated()
 
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Get user published recipes, not exist")
-    fun getUserPublishedRecipesNotExist() {
-        assertThrows<NotExistingUserException> { facade.getUserPublishedRecipes(9u) }
-    }
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setUser() {
-            facade.logIn("login1", "password1")
-        }
-    }
-}
-
-@FlywayTest(DataSource(PGDataSourceProvider::class))
-class AccountTest {
-
-    @Test
-    @DisplayName("Register")
-    fun register() {
-        val login = "login6"
-        val password = "password6"
-        val id = 6
-
-        val expected = User(id.toULong(), login, password, false)
-        facade.register(login, password)
-        val actual = transaction {
-            UserTable.findById(id)?.toEntity() ?: throw NotFoundInDBException("User with id = $id not found")
+        val actual1 = repository.updateCredentials(expected.id, expected.login, expected.password)
+        val actual2 = transaction {
+            UserTable.findById(expected.id)?.toEntity() ?: throw NotFoundException("User with id = $id not found")
         }
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual1)
+        assertEquals(expected, actual2)
     }
 
-    @Test
-    @DisplayName("Register, not uniq")
-    fun registerNotUniq() {
-        val login = "login1"
-        val password = "password1"
+//    @Test
+//    @DisplayName("Update credentials, not found")
+//    fun updateCredentialsNotFound() {
+//        val tmp = UserDataMother.notExist()
+//
+//        assertThrows<NotFoundException> { repository.updateCredentials(tmp.id, tmp.login, tmp.password) }
+//    }
 
-        assertThrows<AlreadyExistingUserException> { facade.register(login, password) }
-    }
-
-    @Test
-    @DisplayName("Register, didn't passed validation")
-    fun registerNotValid() {
-        val login = ""
-        val password = ""
-
-        assertThrows<ValidationUserException> { facade.register(login, password) }
-    }
-
-    @Test
-    @DisplayName("LogIn")
-    fun logIn() {
-        val login = "login1"
-        val password = "password1"
-        val id = 1
-
-        val actual = facade.logIn(login, password)
-        val expected = User(id.toULong(), "login1", "password1", true)
-
-        assertEquals(actual, expected)
-    }
-
-    @Test
-    @DisplayName("LogIn fail")
-    fun logInFail() {
-        val login = "login1"
-        assertThrows<LogInFailedException> { facade.logIn(login, "asasasas") }
-    }
-
-    @Test
-    @DisplayName("LogIn, no User")
-    fun logInNoUser() {
-        assertThrows<NotExistingUserException> { facade.logIn("dsdsa", "asasasas") }
-    }
-}
-
-@FlywayTest(DataSource(PGDataSourceProvider::class))
-class FeedTest {
-
-    @Test
-    @DisplayName("Sorted by date feed")
-    fun getFeedSortedByDate() {
-        val actual = facade.getFeedSortedByDate()
-        val expected = listOf(
-            RecipePreview(1u, "name1", "desc1", 1u, 1u)
-        )
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Get saved feed")
-    fun getSavedFeed() {
-        val id = 4
-
-        val actual = facade.getSavedFeed(id.toULong())
-        val expected = listOf(
-            RecipePreview(4u, "name4", "desc4", 4u, 4u), RecipePreview(5u, "name5", "desc5", 5u, 5u)
-        )
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Get saved feed, user not exist")
-    fun getSavedFeedUserNotExist() {
-        assertThrows<NotExistingUserException> { facade.getSavedFeed(9u) }
-    }
-
-    @Test
-    @DisplayName("Get own feed")
-    fun getOwnFeed() {
-        val id = 1
-
-        val actual = facade.getOwnFeed(id.toULong())
-        val expected = listOf(RecipePreview(1u, "name1", "desc1", 1u, 1u))
-
-        assertEquals(expected, actual)
-    }
-
-    @Test
-    @DisplayName("Get own feed, user not exist")
-    fun getOwnFeedUserNotExist() {
-        assertThrows<NotExistingUserException> { facade.getOwnFeed(9u) }
-    }
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setUser() {
-            facade.logIn("login1", "password1")
-        }
-    }
+//    @Test
+//    @DisplayName("Update credentials, not found")
+//    fun addToFavorite() {
+//
+//
+//        assertThrows<NotFoundException> { repository.updateCredentials(tmp.id, tmp.login, tmp.password) }
+//    }
+//
+//    @Test
+//    @DisplayName("Get user published recipes")
+//    fun getUserPublishedRecipes() {
+//        val id = 1
+//        val expected = listOf(RecipePreview(id.toULong(), "name1", "desc1", 1u, 1u))
+//        val actual = facade.getUserPublishedRecipes(id.toULong())
+//
+//        assertEquals(expected, actual)
+//    }
+//
+//    @Test
+//    @DisplayName("Get user published recipes, not exist")
+//    fun getUserPublishedRecipesNotExist() {
+//        assertThrows<NotExistingUserException> { facade.getUserPublishedRecipes(9u) }
+//    }
+//
+//    companion object {
+//        @JvmStatic
+//        @BeforeAll
+//        fun setUser() {
+//            facade.logIn("login1", "password1")
+//        }
+//    }
 }

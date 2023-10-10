@@ -3,96 +3,74 @@ package bl.managers
 import bl.entities.Comment
 import bl.exceptions.AccessDeniedException
 import bl.exceptions.NotAuthorizedException
-import bl.exceptions.NotExistingCommentException
-import bl.exceptions.ValidationCommentException
+import bl.exceptions.ValidationException
 import bl.repositories.ICommentRepository
-import bl.repositories.IRepository
 import org.slf4j.LoggerFactory
 
-object CommentManager : ICRUDManager<Comment> {
+
+object CommentManager {
     private lateinit var repository: ICommentRepository
 
     private val logger = LoggerFactory.getLogger("mainLogger")
 
-    override fun registerRepository(repository: IRepository<Comment>) {
-        this.repository = repository as ICommentRepository
+    fun registerRepository(repository: ICommentRepository) {
+        this.repository = repository
     }
 
-    override fun create(obj: Comment) {
-//        logger.trace("{} called with parameters {}", ::create.name, obj)
-//
-//
-//        AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-//        if (!isUniq(obj)) {
-//            throw AlreadyExistingCommentException("Comment already exists")
-//        }
-//        if (!validate(obj)) {
-//            throw ValidationCommentException("Comment failed validation")
-//        }
-//
-//        repository.create(obj)
+    fun create(userID: Int, text: String, recipeID: Int): Int {
+        logger.trace("{} called with parameters {}, {}, {}", ::create.name, userID, text, recipeID)
+
+        AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
+        if (!validateText(text)) throw ValidationException("Comment failed validation")
+
+        return repository.create(userID, text, recipeID)
     }
 
-    override fun read(id: ULong): Comment {
-//        logger.trace("{} called with parameters {}", ::read.name, id)
-//
-//        if (!isExist(id)) {
-//            throw NotExistingCommentException("Comment not exists")
-//        }
-//
-//        return repository.read(id)
-        TODO()
-    }
-
-    override fun update(obj: Comment) {
+    fun update(obj: Comment) {
         logger.trace("{} called with parameters {}", ::update.name, obj)
 
         val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!UserManager.isAdmin(uId)) {
-            throw AccessDeniedException("Access denied")
-        }
-        if (!isExist(obj.id)) {
-            throw NotExistingCommentException("Comment not exists")
-        }
-        if (!validate(obj)) {
-            throw ValidationCommentException("Comment failed validation")
-        }
+        if (!UserManager.isAdmin(uId)) throw AccessDeniedException("Access denied")
+        if (!validate(obj)) throw ValidationException("Comment failed validation")
+
 
         repository.update(obj)
     }
 
-    override fun delete(id: ULong) {
+    fun delete(id: Int) {
         logger.trace("{} called with parameters {}", ::delete.name, id)
 
         val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!UserManager.isAdmin(uId)) {
-            throw AccessDeniedException("Access denied")
-        }
-        if (!isExist(id)) {
-            throw NotExistingCommentException("Comment not exists")
-        }
+        if (!UserManager.isAdmin(uId)) throw AccessDeniedException("Access denied")
 
         repository.delete(id)
     }
 
-    override fun getAll(): List<Comment> {
-//        logger.trace("{} called", ::getAll.name)
-//
-//        return repository.getAll()
-        TODO()
+    fun updateText(id: Int, text: String): Comment {
+        logger.trace("{} called with parameters {}, {}", ::updateText.name, id, text)
+
+        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
+        if (!UserManager.isAdmin(uId) && !isOwner(id, uId)) throw AccessDeniedException("Access denied")
+        if (!validateText(text)) throw ValidationException("Comment failed validation")
+
+        return repository.updateText(id, text)
     }
 
-    override fun isUniq(obj: Comment) = true
+    private fun validateText(text: String): Boolean {
+        logger.trace("{} called with parameters {}", ::validate.name, text)
 
-    override fun isExist(id: ULong): Boolean {
-        logger.trace("{} called with parameters {}", ::isExist.name, id)
-
-        return repository.exists(id)
+        return text.isNotEmpty()
     }
 
-    override fun validate(obj: Comment): Boolean {
+    private fun validate(obj: Comment): Boolean {
         logger.trace("{} called with parameters {}", ::validate.name, obj)
 
         return obj.text.isNotEmpty()
+    }
+
+    fun isOwner(id: Int, userID: Int): Boolean {
+        logger.trace("{} called with parameters {}, {}", ::isOwner.name, id, userID)
+
+        return repository.getOwnerID(id) == userID
     }
 }

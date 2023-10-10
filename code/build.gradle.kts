@@ -2,7 +2,7 @@ val logback_version: String by project
 val slf4j_version: String by project
 
 plugins {
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm") version "1.9.10"
     application
     java
     id("co.uzzu.dotenv.gradle") version "2.0.0"
@@ -20,7 +20,6 @@ dependencies {
 
     implementation(project(":BL"))
     implementation(project(":DA"))
-    implementation(project(":TechUi"))
     implementation(project(":RestAPI"))
 
     implementation("ch.qos.logback:logback-classic:$logback_version")

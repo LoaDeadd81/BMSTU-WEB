@@ -24,12 +24,11 @@ class UserTable(id: EntityID<Int>) : IntEntity(id) {
     val comments by CommentTable referrersOn Comments.autor
     val savedRecipesList by SavedRecipeTable referrersOn SavedRecipes.user
 
-    //    var savedRecipes by RecipeTable via SavedRecipes
     var savedRecipesPreview by RecipePreviewTable via SavedRecipes
 }
 
 fun UserTable.toEntity(): User = User(
-    id = this.id.value.toULong(),
+    id = this.id.value,
     login = this.login,
     password = this.password,
     isAdmin = this.isAdmin

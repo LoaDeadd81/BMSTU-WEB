@@ -5,19 +5,18 @@ import bl.exceptions.LogInFailedException
 import org.slf4j.LoggerFactory
 
 object AccountService {
-    private var currentUser: User? = null
+    private var currentUserID: Int? = null
 
     private val logger = LoggerFactory.getLogger("mainLogger")
 
-    fun register(login: String, password: String) {
+    fun register(login: String, password: String): Int {
         logger.trace("{} called with parameters {}", ::register.name, login)
 
-        val user = User(0u, login, password, false)
-        UserManager.create(user)
-
-        currentUser = UserManager.getByLogin(login)
+        val id = UserManager.create(login, password)
 
         logger.info("User with login {} registered", login)
+
+        return id
     }
 
     fun logIN(login: String, password: String): User {
@@ -28,31 +27,29 @@ object AccountService {
             logger.debug("User with login {} failed logging", login)
             throw LogInFailedException("LogIn failed")
         } else {
-            currentUser = user
+            currentUserID = user.id
             return user
         }
     }
 
-    fun getCurrentUserId(): ULong? {
-        logger.trace("{} called", ::getCurrentUserId.name)
-
-        return currentUser?.id
+    fun setId(id: Int) {
+        currentUserID = id
     }
 
-    fun isCurrentUserAdmin(): Boolean? {
+    fun getCurrentUserId(): Int? {
         logger.trace("{} called", ::getCurrentUserId.name)
 
-        return currentUser?.isAdmin
+        return currentUserID
     }
 
     fun clearUser() {
         logger.trace("{} called", ::clearUser.name)
 
-        currentUser = null
+        currentUserID = null
     }
 
 
-    private fun passwordConvert(password: String): String { //todo
+    private fun passwordConvert(password: String): String {
         logger.trace("{} called", ::passwordConvert.name)
 
         return password

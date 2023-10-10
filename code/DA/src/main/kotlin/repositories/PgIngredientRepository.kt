@@ -5,34 +5,34 @@ import bl.repositories.IIngredientRepository
 import da.dao.IngredientTable
 import da.dao.Ingredients
 import da.dao.toEntity
-import da.exeption.NotFoundInDBException
+import da.exeption.NotFoundException
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
+import java.sql.Connection
 
 class PgIngredientRepository : IIngredientRepository {
     private val logger = LoggerFactory.getLogger("mainLogger")
 
-    override fun create(obj: Ingredient) {
+    override fun create(obj: Ingredient): Int {
         logger.trace("{} called with parameters {}", ::create.name, obj)
 
-        transaction {
+        val dao = transaction {
             IngredientTable.new {
                 name = obj.name
-                type = obj.type
+                type = obj.type.value
                 nutritionalValue = obj.nutritionalValue.toInt()
             }
         }
+
+        return dao.id.value
     }
 
-    override fun read(id: ULong): Ingredient {
-//        logger.trace("{} called with parameters {}", ::read.name, id)
-//
-//        return transaction {
-//            IngredientTable.findById(id.toInt())?.toEntity()
-//                ?: throw NotFoundInDBException("Ingredient with id = $id not found")
-//
-//        }
-        TODO()
+    override fun read(id: Int): Ingredient {
+        logger.trace("{} called with parameters {}", ::read.name, id)
+
+        return transaction {
+            IngredientTable.findById(id)?.toEntity() ?: throw NotFoundException("Ingredient with id = $id not found")
+        }
     }
 
     override fun update(obj: Ingredient) {
@@ -40,19 +40,19 @@ class PgIngredientRepository : IIngredientRepository {
 
         transaction {
             val dao = IngredientTable.findById(obj.id.toInt())
-                ?: throw NotFoundInDBException("Ingredient with id = ${obj.id} not found")
+                ?: throw NotFoundException("Ingredient with id = ${obj.id} not found")
             dao.name = obj.name
-            dao.type = obj.type
+            dao.type = obj.type.value
             dao.nutritionalValue = obj.nutritionalValue.toInt()
         }
     }
 
-    override fun delete(id: ULong) {
+    override fun delete(id: Int) {
         logger.trace("{} called with parameters {}", ::delete.name, id)
 
         transaction {
             val obj = IngredientTable.findById(id.toInt())
-                ?: throw NotFoundInDBException("Ingredient with id = $id not found")
+                ?: throw NotFoundException("Ingredient with id = $id not found")
             obj.list.map { it.delete() }
             obj.delete()
         }
@@ -66,24 +66,17 @@ class PgIngredientRepository : IIngredientRepository {
         }
     }
 
-    override fun exists(id: ULong): Boolean {
-        logger.trace("{} called with parameters {}", ::exists.name, id)
-
-        return transaction { IngredientTable.findById(id.toInt()) != null }
-    }
-
     override fun isNameNotExist(name: String): Boolean {
         logger.trace("{} called with parameters {}", ::isNameNotExist.name, name)
 
         return transaction { IngredientTable.find { Ingredients.name eq name }.firstOrNull() } == null
     }
 
-    override fun findByName(name: String): Ingredient {
+    override fun findByName(name: String): List<Ingredient> {
         logger.trace("{} called with parameters {}", ::findByName.name, name)
 
         return transaction {
-            IngredientTable.find { Ingredients.name eq name }.firstOrNull()?.toEntity()
-                ?: throw NotFoundInDBException("Ingredient with name = $name not found")
+            IngredientTable.find { Ingredients.name like "%$name%" }.map { it.toEntity() }
         }
     }
 }

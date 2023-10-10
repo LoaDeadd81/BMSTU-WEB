@@ -4,9 +4,9 @@ val logback_version: String by project
 val slf4j_version: String by project
 
 plugins {
-    kotlin("jvm") version "1.8.0"
-    id("io.ktor.plugin") version "2.3.4"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.0"
+    kotlin("jvm") version "1.9.10"
+    id("io.ktor.plugin") version "2.3.5"
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
 
     application
 }
@@ -33,6 +33,10 @@ dependencies {
     implementation("io.ktor:ktor-server-netty-jvm")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("org.slf4j:slf4j-api:$slf4j_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
+    implementation("io.ktor:ktor-server-request-validation:$ktor_version")
+    implementation("io.ktor:ktor-server-status-pages:$ktor_version")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

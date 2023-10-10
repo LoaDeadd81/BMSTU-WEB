@@ -136,6 +136,14 @@ path:
 
     parameters:
         - $ref: "parameters.yml#/components/parameters/id"
+        - in: path
+          name: recipe_id
+          description: ID of recipe
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
 
 
 
@@ -249,12 +257,12 @@ components:
           schema:
             type: object
             properties:
-            user:
-              $ref: "#/components/schemas/getUser"
-            recipes:
-              type: array
-              items:
-                $ref: "recipe.yml#/components/schemas/getRecipeFeed"
+              user:
+                $ref: "#/components/schemas/getUser"
+              recipes:
+                type: array
+                items:
+                  $ref: "recipe.yml#/components/schemas/getRecipeFeed"
 
     201:
       description: Successful operation

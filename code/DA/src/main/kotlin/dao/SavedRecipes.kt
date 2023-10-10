@@ -4,10 +4,11 @@ import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.ReferenceOption
 
 object SavedRecipes : IntIdTable("saved_recipes") {
-    val user = reference("userid", Users)
-    val recipe = reference("recipeid", Recipes)
+    val user = reference("userid", Users, onDelete = ReferenceOption.CASCADE)
+    val recipe = reference("recipeid", Recipes, onDelete = ReferenceOption.CASCADE)
 }
 
 class SavedRecipeTable(id: EntityID<Int>) : IntEntity(id) {

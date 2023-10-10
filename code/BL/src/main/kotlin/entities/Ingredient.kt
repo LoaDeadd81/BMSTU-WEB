@@ -16,7 +16,7 @@ enum class IngredientType(val value: Int) {
     }
 
     companion object {
-        fun fromInt(value: Int) = IngredientType.values().first { it.value == value }
+        fun fromInt(value: Int) = entries.first { it.value == value }
     }
 }
 
@@ -36,30 +36,22 @@ enum class ProcessingType(val value: Int) {
     }
 
     companion object {
-        fun fromInt(value: Int) = ProcessingType.values().first { it.value == value }
+        fun fromInt(value: Int) = entries.first { it.value == value }
     }
 }
 
 data class Ingredient(
-    val id: ULong,
+    var id: Int,
     var name: String,
     var type: IngredientType,
-    var nutritionalValue: UInt,
+    var nutritionalValue: Int,
 )
 
 data class IngredientInStage(
-    val id: ULong,
-    var name: String,
-    var type: IngredientType,
-    var amount: UInt,
-    var nutritionalValue: UInt,
+    var id: Int,
+    var name: String = "",
+    var type: IngredientType = IngredientType.MEAT,
+    var amount: Int,
+    var nutritionalValue: Int = 0,
     var processingType: ProcessingType
 )
-
-//data class IngredientInRecipe(
-//    val id: ULong,
-//    var name: String,
-//    var type: IngredientType,
-//    var amount: UInt,
-//    var nutritionalValue: UInt,
-//)

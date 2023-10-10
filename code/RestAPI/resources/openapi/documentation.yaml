@@ -1,8 +1,1871 @@
-openapi: "3.0.3"
+openapi: "3.0.2"
 info:
-  title: "ktor_sample API"
-  description: "ktor_sample API"
-  version: "1.0.0"
+  title: KApp
+  version: "1.0"
 servers:
-- url: "https://ktor_sample"
-paths: {}
+  - url: http://0.0.0.0:8089/api/v1
+    description: dev stand
+tags:
+  - name: auth
+    description: Authorisation
+  - name: user
+    description: All about users
+  - name: recipe
+    description: All about recipes
+  - name: ingredient
+    description: All about ingredients
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - login
+                - password
+              properties:
+                login:
+                  type: string
+                  example: "login1"
+                password:
+                  type: string
+                  format: password
+                  example: "password1"
+      responses:
+        200:
+          description: Successful operation
+        400:
+          description: Bad request
+        401:
+          description: Invalid login or password
+        500:
+          description: Failed
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Register
+      description: Register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - login
+                - password
+              properties:
+                login:
+                  type: string
+                  example: "login"
+                password:
+                  type: string
+                  format: password
+                  example: "password"
+      responses:
+        200:
+          description: Successful operation
+        400:
+          description: Bad request
+        500:
+          description: Failed
+  /auth/logout:
+    delete:
+      tags:
+        - auth
+      summary: Logout
+      responses:
+        204:
+          description: Successful operation
+
+  /users:
+    post:
+      tags:
+        - user
+      summary: Create user
+      operationId: storeUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - login
+                - password
+              properties:
+                login:
+                  type: string
+                  example: "login"
+                password:
+                  type: string
+                  format: password
+                  example: "password"
+      responses:
+        201:
+          description: Successful operation
+          headers:
+            Location:
+              description: URI of created user
+              schema:
+                type: string
+                format: URI
+                example: http://localhost:8080/api/v1/users/1
+        500:
+          description: Failed
+
+    get:
+      tags:
+        - user
+      summary: Get all users
+      operationId: indexUser
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                      minimum: 1
+                      example: 1
+                    login:
+                      type: string
+                      example: "login"
+                    isAdmin:
+                      type: boolean
+                      example: true
+        400:
+          description: Bad request
+        500:
+          description: Failed
+  /users/{id}:
+    get:
+      tags:
+        - user
+      summary: Ger userdasd
+      operationId: showUser
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  login:
+                    type: string
+                    example: "login"
+                  isAdmin:
+                    type: boolean
+                    example: true
+        200Full:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                      minimum: 1
+                      example: 1
+                    name:
+                      type: string
+                      example: "name"
+                    description:
+                      type: string
+                      example: "description"
+                    time:
+                      type: integer
+                      format: int32
+                      minimum: 1
+                      example: 1
+                    servingsNum:
+                      type: integer
+                      format: int32
+                      minimum: 1
+                      example: 1
+                    pfc:
+                      type: object
+                      properties:
+                        protein:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                        fat:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                        carbon:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                    date:
+                      type: string
+                      format: date-time
+                      example: "2017-07-21 17:32:28"
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+      parameters:
+        - in: query
+          name: full
+          schema:
+            type: boolean
+            example: true
+
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - user
+      summary: Update user
+      operationId: updateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - login
+                - password
+                - isAdmin
+              properties:
+                login:
+                  type: string
+                  example: "login"
+                password:
+                  type: string
+                  format: password
+                  example: "password"
+                isAdmin:
+                  type: boolean
+                  example: true
+      responses:
+        204:
+          description: Successful operation
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - user
+      summary: Dlete user
+      operationId: deleteUser
+      responses:
+        204:
+          description: Successful operation
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    patch:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - user
+      summary: Update credentials
+      operationId: patchUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - login
+                - password
+              properties:
+                login:
+                  type: string
+                  example: "login"
+                password:
+                  type: string
+                  format: password
+                  example: "password"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  login:
+                    type: string
+                    example: "login"
+                  isAdmin:
+                    type: boolean
+                    example: true
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    parameters:
+      - in: path
+        name: id
+        description: ID of user
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+  /users/{id}/saved-recipes/{recipe_id}:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - user
+      summary: Add recipe to user favorite
+      operationId: likeUserRecipe
+      responses:
+        204:
+          description: Successful operation
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - user
+      summary: Delete recipe from user favorite
+      operationId: dislikeUserRecipe
+      responses:
+        204:
+          description: Successful operation
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    parameters:
+      - in: path
+        name: id
+        description: ID of user
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      - in: path
+        name: recipe_id
+        description: ID of recipe
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+
+  /recipes:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - recipe
+      summary: Create recipe
+      operationId: storeRecipe
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: "name"
+                  description:
+                    type: string
+                    example: "description"
+                  time:
+                    type: integer
+                    format: int32
+                    minimum: 1
+                    example: 1
+                  servingsNum:
+                    type: integer
+                    format: int32
+                    minimum: 1
+                    example: 1
+                  pfc:
+                    type: object
+                    properties:
+                      protein:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                      fat:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                      carbon:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                  stages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        time:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                        description:
+                          type: string
+                          example: "description"
+                        ingredients:
+                          type: object
+                          properties:
+                            ingredient_id:
+                              type: integer
+                              format: int32
+                              minimum: 1
+                              example: 1
+                            amount:
+                              type: integer
+                              format: int32
+                              minimum: 1
+                              example: 1
+                            processingType:
+                              type: string
+                              enum:
+                                - WASH
+                                - DRY
+                                - CLEAR
+                                - CUT
+                                - MIX
+                                - BOIL
+                                - FRY
+                                - BAKE
+                                - PUT_OUT
+                              example: WASH
+      responses:
+        201:
+          description: Successful operation
+          headers:
+            Location:
+              description: URI of created user
+              schema:
+                type: string
+                format: URI
+                example: http://localhost:8080/api/v1/recipe/1
+        500:
+          description: Failed
+    get:
+      tags:
+        - recipe
+      summary: Get all recipes
+      operationId: indexRecipe
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                      minimum: 1
+                      example: 1
+                    name:
+                      type: string
+                      example: "name"
+                    description:
+                      type: string
+                      example: "description"
+                    time:
+                      type: integer
+                      format: int32
+                      minimum: 1
+                      example: 1
+                    servingsNum:
+                      type: integer
+                      format: int32
+                      minimum: 1
+                      example: 1
+                    pfc:
+                      type: object
+                      properties:
+                        protein:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                        fat:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                        carbon:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                    date:
+                      type: string
+                      format: date-time
+                      example: "2017-07-21 17:32:28"
+        400:
+          description: Bad request
+        500:
+          description: Failed
+      parameters:
+        - in: query
+          name: user_id
+          description: ID of user
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            example: 1
+        - in: query
+          name: saved
+          description: filter for saved recipes
+          schema:
+            type: boolean
+            example: true
+        - in: query
+          name: state
+          description: state of recipe
+          schema:
+            type: string
+            enum:
+              - CLOSE
+              - READY_TO_PUBLISH
+              - PUBLISHED
+            example: CLOSE
+
+
+  /recipes/{id}:
+    get:
+      tags:
+        - recipe
+      summary: Ger recipe
+      operationId: showRecipe
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  name:
+                    type: string
+                    example: "name"
+                  description:
+                    type: string
+                    example: "description"
+                  time:
+                    type: integer
+                    format: int32
+                    minimum: 1
+                    example: 1
+                  servingsNum:
+                    type: integer
+                    format: int32
+                    minimum: 1
+                    example: 1
+                  pfc:
+                    type: object
+                    properties:
+                      protein:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                      fat:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                      carbon:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                  date:
+                    type: string
+                    format: date-time
+                    example: "2017-07-21 17:32:28"
+                  stages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          minimum: 1
+                          example: 1
+                        time:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                        description:
+                          type: string
+                          example: "description"
+                        ingredients:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              ingredient_id:
+                                type: integer
+                                format: int64
+                                minimum: 1
+                                example: 1
+                              name:
+                                type: string
+                                example: "name"
+                              type:
+                                type: string
+                                enum:
+                                  - MEAT
+                                  - HORTICULTURAL_PROD
+                                  - TASTE_PROD
+                                  - FATS
+                                  - MILK_PROD
+                                  - CONFECTIONERY
+                                  - GRAIN
+                                  - FISH
+                                  - EGGS
+                                example: EGGS
+                              amount:
+                                type: integer
+                                format: int32
+                                minimum: 1
+                                example: 1
+                              nutritionalValue:
+                                type: integer
+                                format: int32
+                                minimum: 1
+                                example: 1
+                              processingType:
+                                type: string
+                                enum:
+                                  - WASH
+                                  - DRY
+                                  - CLEAR
+                                  - CUT
+                                  - MIX
+                                  - BOIL
+                                  - FRY
+                                  - BAKE
+                                  - PUT_OUT
+                                example: WASH
+                  comments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          minimum: 1
+                          example: 1
+                        date:
+                          type: string
+                          format: date-time
+                          example: "2017-07-21 17:32:28"
+                        text:
+                          type: string
+                          example: "text"
+                        user:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              format: int64
+                              minimum: 1
+                              example: 1
+                            login:
+                              type: string
+                              example: "login"
+                            isAdmin:
+                              type: boolean
+                              example: true
+                  owner:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        minimum: 1
+                        example: 1
+                      login:
+                        type: string
+                        example: "login"
+                      isAdmin:
+                        type: boolean
+                        example: true
+                  ingredients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          minimum: 1
+                          example: 1
+                        name:
+                          type: string
+                          example: "name"
+                        type:
+                          type: string
+                          enum:
+                            - MEAT
+                            - HORTICULTURAL_PROD
+                            - TASTE_PROD
+                            - FATS
+                            - MILK_PROD
+                            - CONFECTIONERY
+                            - GRAIN
+                            - FISH
+                            - EGGS
+                          example: EGGS
+                        nutritionalValue:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                  is_saved:
+                    type: boolean
+                    example: true
+                  state:
+                    type: string
+                    enum:
+                      - CLOSE
+                      - READY_TO_PUBLISH
+                      - PUBLISHED
+                    example: CLOSE
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - recipe
+      summary: Update recipe
+      operationId: updateRecipe
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "name"
+                description:
+                  type: string
+                  example: "description"
+                time:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                  example: 1
+                servingsNum:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                  example: 1
+                pfc:
+                  type: object
+                  properties:
+                    protein:
+                      type: integer
+                      format: int32
+                      minimum: 1
+                      example: 1
+                    fat:
+                      type: integer
+                      format: int32
+                      minimum: 1
+                      example: 1
+                    carbon:
+                      type: integer
+                      format: int32
+                      minimum: 1
+                      example: 1
+                stages:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      time:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                      description:
+                        type: string
+                        example: "description"
+                      ingredients:
+                        type: object
+                        properties:
+                          ingredient_id:
+                            type: integer
+                            format: int32
+                            minimum: 1
+                            example: 1
+                          amount:
+                            type: integer
+                            format: int32
+                            minimum: 1
+                            example: 1
+                          processingType:
+                            type: string
+                            enum:
+                              - WASH
+                              - DRY
+                              - CLEAR
+                              - CUT
+                              - MIX
+                              - BOIL
+                              - FRY
+                              - BAKE
+                              - PUT_OUT
+                            example: WASH
+                date:
+                  type: string
+                  format: date-time
+                  example: "2017-07-21 17:32:28"
+                owner_id:
+                  type: integer
+                  format: int64
+                  minimum: 1
+                  example: 1
+                state:
+                  type: string
+                  enum:
+                    - CLOSE
+                    - READY_TO_PUBLISH
+                    - PUBLISHED
+                  example: CLOSE
+      responses:
+        204:
+          description: Successful operation
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - recipe
+      summary: Dlete recipe
+      operationId: deleteRecipe
+      responses:
+        204:
+          description: Successful operation
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    parameters:
+      - in: path
+        name: id
+        description: ID of recipe
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+
+
+  /recipes/{id}/info:
+    patch:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - recipe
+      summary: Update recipe hat
+      operationId: updateRecipeInfo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "name"
+                description:
+                  type: string
+                  example: "description"
+                time:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                  example: 1
+                servingsNum:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                  example: 1
+                pfc:
+                  type: object
+                  properties:
+                    protein:
+                      type: integer
+                      format: int32
+                      minimum: 1
+                      example: 1
+                    fat:
+                      type: integer
+                      format: int32
+                      minimum: 1
+                      example: 1
+                    carbon:
+                      type: integer
+                      format: int32
+                      minimum: 1
+                      example: 1
+                state:
+                  type: string
+                  enum:
+                    - CLOSE
+                    - READY_TO_PUBLISH
+                    - PUBLISHED
+                  example: CLOSE
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  name:
+                    type: string
+                    example: "name"
+                  description:
+                    type: string
+                    example: "description"
+                  time:
+                    type: integer
+                    format: int32
+                    minimum: 1
+                    example: 1
+                  servingsNum:
+                    type: integer
+                    format: int32
+                    minimum: 1
+                    example: 1
+                  pfc:
+                    type: object
+                    properties:
+                      protein:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                      fat:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                      carbon:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                  date:
+                    type: string
+                    format: date-time
+                    example: "2017-07-21 17:32:28"
+                  published:
+                    type: boolean
+                    example: true
+                  stages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          minimum: 1
+                          example: 1
+                        time:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                        description:
+                          type: string
+                          example: "description"
+                        ingredients:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              ingredient_id:
+                                type: integer
+                                format: int64
+                                minimum: 1
+                                example: 1
+                              name:
+                                type: string
+                                example: "name"
+                              type:
+                                type: string
+                                enum:
+                                  - MEAT
+                                  - HORTICULTURAL_PROD
+                                  - TASTE_PROD
+                                  - FATS
+                                  - MILK_PROD
+                                  - CONFECTIONERY
+                                  - GRAIN
+                                  - FISH
+                                  - EGGS
+                                example: EGGS
+                              amount:
+                                type: integer
+                                format: int32
+                                minimum: 1
+                                example: 1
+                              nutritionalValue:
+                                type: integer
+                                format: int32
+                                minimum: 1
+                                example: 1
+                              processingType:
+                                type: string
+                                enum:
+                                  - WASH
+                                  - DRY
+                                  - CLEAR
+                                  - CUT
+                                  - MIX
+                                  - BOIL
+                                  - FRY
+                                  - BAKE
+                                  - PUT_OUT
+                                example: WASH
+                  comments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          minimum: 1
+                          example: 1
+                        date:
+                          type: string
+                          format: date-time
+                          example: "2017-07-21 17:32:28"
+                        text:
+                          type: string
+                          example: "text"
+                        user:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              format: int64
+                              minimum: 1
+                              example: 1
+                            login:
+                              type: string
+                              example: "login"
+                            isAdmin:
+                              type: boolean
+                              example: true
+                  owner:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        minimum: 1
+                        example: 1
+                      login:
+                        type: string
+                        example: "login"
+                      isAdmin:
+                        type: boolean
+                        example: true
+                  ingredients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          minimum: 1
+                          example: 1
+                        name:
+                          type: string
+                          example: "name"
+                        type:
+                          type: string
+                          enum:
+                            - MEAT
+                            - HORTICULTURAL_PROD
+                            - TASTE_PROD
+                            - FATS
+                            - MILK_PROD
+                            - CONFECTIONERY
+                            - GRAIN
+                            - FISH
+                            - EGGS
+                          example: EGGS
+                        nutritionalValue:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                  is_saved:
+                    type: boolean
+                    example: true
+                  state:
+                    type: string
+                    enum:
+                      - CLOSE
+                      - READY_TO_PUBLISH
+                      - PUBLISHED
+                    example: CLOSE
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    parameters:
+      - in: path
+        name: id
+        description: ID of recipe
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+
+  /recipes/{id}/stages:
+    patch:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - recipe
+      summary: Update recipe stages
+      operationId: updateRecipeStages
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  time:
+                    type: integer
+                    format: int32
+                    minimum: 1
+                    example: 1
+                  description:
+                    type: string
+                    example: "description"
+                  ingredients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        ingredient_id:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                        amount:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                        processingType:
+                          type: string
+                          enum:
+                            - WASH
+                            - DRY
+                            - CLEAR
+                            - CUT
+                            - MIX
+                            - BOIL
+                            - FRY
+                            - BAKE
+                            - PUT_OUT
+                          example: WASH
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  name:
+                    type: string
+                    example: "name"
+                  description:
+                    type: string
+                    example: "description"
+                  time:
+                    type: integer
+                    format: int32
+                    minimum: 1
+                    example: 1
+                  servingsNum:
+                    type: integer
+                    format: int32
+                    minimum: 1
+                    example: 1
+                  pfc:
+                    type: object
+                    properties:
+                      protein:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                      fat:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                      carbon:
+                        type: integer
+                        format: int32
+                        minimum: 1
+                        example: 1
+                  date:
+                    type: string
+                    format: date-time
+                    example: "2017-07-21 17:32:28"
+                  published:
+                    type: boolean
+                    example: true
+                  stages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          minimum: 1
+                          example: 1
+                        time:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                        description:
+                          type: string
+                          example: "description"
+                        ingredients:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              ingredient_id:
+                                type: integer
+                                format: int64
+                                minimum: 1
+                                example: 1
+                              name:
+                                type: string
+                                example: "name"
+                              type:
+                                type: string
+                                enum:
+                                  - MEAT
+                                  - HORTICULTURAL_PROD
+                                  - TASTE_PROD
+                                  - FATS
+                                  - MILK_PROD
+                                  - CONFECTIONERY
+                                  - GRAIN
+                                  - FISH
+                                  - EGGS
+                                example: EGGS
+                              amount:
+                                type: integer
+                                format: int32
+                                minimum: 1
+                                example: 1
+                              nutritionalValue:
+                                type: integer
+                                format: int32
+                                minimum: 1
+                                example: 1
+                              processingType:
+                                type: string
+                                enum:
+                                  - WASH
+                                  - DRY
+                                  - CLEAR
+                                  - CUT
+                                  - MIX
+                                  - BOIL
+                                  - FRY
+                                  - BAKE
+                                  - PUT_OUT
+                                example: WASH
+                  comments:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          minimum: 1
+                          example: 1
+                        date:
+                          type: string
+                          format: date-time
+                          example: "2017-07-21 17:32:28"
+                        text:
+                          type: string
+                          example: "text"
+                        user:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              format: int64
+                              minimum: 1
+                              example: 1
+                            login:
+                              type: string
+                              example: "login"
+                            isAdmin:
+                              type: boolean
+                              example: true
+                  owner:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        format: int64
+                        minimum: 1
+                        example: 1
+                      login:
+                        type: string
+                        example: "login"
+                      isAdmin:
+                        type: boolean
+                        example: true
+                  ingredients:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int64
+                          minimum: 1
+                          example: 1
+                        name:
+                          type: string
+                          example: "name"
+                        type:
+                          type: string
+                          enum:
+                            - MEAT
+                            - HORTICULTURAL_PROD
+                            - TASTE_PROD
+                            - FATS
+                            - MILK_PROD
+                            - CONFECTIONERY
+                            - GRAIN
+                            - FISH
+                            - EGGS
+                          example: EGGS
+                        nutritionalValue:
+                          type: integer
+                          format: int32
+                          minimum: 1
+                          example: 1
+                  is_saved:
+                    type: boolean
+                    example: true
+                  state:
+                    type: string
+                    enum:
+                      - CLOSE
+                      - READY_TO_PUBLISH
+                      - PUBLISHED
+                    example: CLOSE
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    parameters:
+      - in: path
+        name: id
+        description: ID of recipe
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+
+  /recipes/{id}/comments:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - recipe
+      summary: Add comment to recipe
+      operationId: createRecipeComment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  example: "text"
+      responses:
+        201:
+          description: Successful operation
+          headers:
+            Location:
+              description: URI of created user
+              schema:
+                type: string
+                format: URI
+                example: http://localhost:8080/api/v1/comments/1
+        204:
+          description: Successful operation
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    parameters:
+      - in: path
+        name: id
+        description: ID of recipe
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+
+
+  /recipes/{id}/comments/{comment_id}:
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - recipe
+      summary: Update comment
+      operationId: updateComment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date:
+                  type: string
+                  format: date-time
+                  example: "2017-07-21 17:32:28"
+                text:
+                  type: string
+                  example: "text"
+                user_id:
+                  type: integer
+                  format: int64
+                  minimum: 1
+                  example: 1
+      responses:
+        204:
+          description: Successful operation
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - recipe
+      summary: Dlete comment
+      operationId: deleteComment
+      responses:
+        204:
+          description: Successful operation
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    patch:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - recipe
+      summary: Update text
+      operationId: patchComment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  example: "text"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  test:
+                    type: string
+                    example: "text"
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    parameters:
+      - in: path
+        name: id
+        description: ID of recipe
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+      - in: path
+        name: comment_id
+        description: ID of comment
+        required: true
+        schema:
+          type: integer
+          format: int64
+          minimum: 1
+  /ingredients:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - ingredient
+      summary: Create ingredient
+      operationId: sroreIngredients
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "name"
+                type:
+                  type: string
+                  enum:
+                    - MEAT
+                    - HORTICULTURAL_PROD
+                    - TASTE_PROD
+                    - FATS
+                    - MILK_PROD
+                    - CONFECTIONERY
+                    - GRAIN
+                    - FISH
+                    - EGGS
+                  example: EGGS
+                nutritionalValue:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                  example: 1
+      responses:
+        201:
+          description: Successful operation
+          headers:
+            Location:
+              description: URI of created ingredient
+              schema:
+                type: string
+                format: URI
+                example: http://localhost:8080/api/v1/ingredients/1
+        500:
+          description: Failed
+
+    get:
+      tags:
+        - ingredient
+      summary: Get ingredients
+      operationId: indexIngredients
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                      minimum: 1
+                      example: 1
+                    name:
+                      type: string
+                      example: "name"
+                    type:
+                      type: string
+                      enum:
+                        - MEAT
+                        - HORTICULTURAL_PROD
+                        - TASTE_PROD
+                        - FATS
+                        - MILK_PROD
+                        - CONFECTIONERY
+                        - GRAIN
+                        - FISH
+                        - EGGS
+                      example: EGGS
+                    nutritionalValue:
+                      type: integer
+                      format: int32
+                      minimum: 1
+                      example: 1
+        400:
+          description: Bad request
+        500:
+          description: Failed
+      parameters:
+        - in: query
+          name: name
+          description: Name of ingredient
+          schema:
+            type: string
+  /ingredients/{id}:
+    get:
+      tags:
+        - ingredient
+      summary: Ger ingredient
+      operationId: showIngredient
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+                    example: 1
+                  name:
+                    type: string
+                    example: "name"
+                  type:
+                    type: string
+                    enum:
+                      - MEAT
+                      - HORTICULTURAL_PROD
+                      - TASTE_PROD
+                      - FATS
+                      - MILK_PROD
+                      - CONFECTIONERY
+                      - GRAIN
+                      - FISH
+                      - EGGS
+                    example: EGGS
+                  nutritionalValue:
+                    type: integer
+                    format: int32
+                    minimum: 1
+                    example: 1
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - ingredient
+      summary: Update ingredient
+      operationId: updateIngredient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "name"
+                type:
+                  type: string
+                  enum:
+                    - MEAT
+                    - HORTICULTURAL_PROD
+                    - TASTE_PROD
+                    - FATS
+                    - MILK_PROD
+                    - CONFECTIONERY
+                    - GRAIN
+                    - FISH
+                    - EGGS
+                  example: EGGS
+                nutritionalValue:
+                  type: integer
+                  format: int32
+                  minimum: 1
+                  example: 1
+      responses:
+        204:
+          description: Successful operation
+        400:
+          description: Bad request
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - ingredient
+      summary: Dlete ingredient
+      operationId: deleteIngredient
+      responses:
+        204:
+          description: Successful operation
+        404:
+          description: Not found
+        500:
+          description: Failed
+
+      parameters:
+        - in: path
+          name: id
+          description: ID of user
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+
+    
+    

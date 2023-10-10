@@ -9,7 +9,7 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm") version "1.9.10"
     id("org.flywaydb.flyway") version "9.16.1"
 }
 
@@ -25,10 +25,10 @@ dependencies {
     implementation(project(":BL"))
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-    implementation("org.jetbrains.exposed:exposed-core:0.40.1")
-    implementation("org.jetbrains.exposed:exposed-dao:0.40.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.40.1")
-    implementation("org.jetbrains.exposed:exposed-java-time:0.40.1")
+    implementation("org.jetbrains.exposed:exposed-core:0.44.0")
+    implementation("org.jetbrains.exposed:exposed-dao:0.44.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.44.0")
+    implementation("org.jetbrains.exposed:exposed-java-time:0.44.0")
     implementation("org.postgresql:postgresql:42.6.0")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
     implementation("com.zaxxer:HikariCP:4.0.3")

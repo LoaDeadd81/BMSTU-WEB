@@ -26,6 +26,13 @@ path:
           $ref: "status.yml#/components/responses/400"
         500:
           $ref: "status.yml#/components/responses/500"
+      parameters:
+        - in: query
+          name: name
+          description: Name of ingredient
+          schema:
+            type: string
+            example: "name"
 
   /ingredients/{id}:
     get:

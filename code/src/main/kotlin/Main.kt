@@ -1,7 +1,8 @@
 package main
 
 import api.RestApi
-import bl.Facade
+import api.module
+import bl.managers.*
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.LoggerContext
@@ -10,12 +11,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.FileAppender
 import ch.qos.logback.core.util.StatusPrinter
 import com.zaxxer.hikari.pool.HikariPool
-import controllers.factory.TechControllerFactory
 import da.repositories.factory.PgRepositoryFactory
 import io.github.cdimascio.dotenv.DotenvException
 import io.github.cdimascio.dotenv.dotenv
 import org.slf4j.LoggerFactory
-import techUi.TechApp
 
 fun getLogLevel(level: String): Level {
     return when (level) {
@@ -70,14 +69,15 @@ fun main() {
         val dotenv = dotenv()
         configLoggers(dotenv["LOG_LEVEL"])
 
-//        val facade = Facade(PgRepositoryFactory(dotenv["MAIN_SCHEMA"]))
-//        val controllerFactory = TechControllerFactory(facade)
-//        val techApp = TechApp(facade, controllerFactory)
-//
-//        techApp.menu()
+        val repositoryFactory = PgRepositoryFactory(dotenv["MAIN_SCHEMA"])
+        CommentManager.registerRepository(repositoryFactory.createCommentRepository())
+        IngredientManager.registerRepository(repositoryFactory.createIngredientRepository())
+        RecipeManager.registerRepository(repositoryFactory.createRecipeRepository())
+        UserManager.registerRepository(repositoryFactory.createUserRepository())
 
         val api = RestApi()
         api.run()
+
     } catch (e: HikariPool.PoolInitializationException) {
         println("Не удалось подключиться к БД")
         println(e.message)

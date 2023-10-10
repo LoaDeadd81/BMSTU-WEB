@@ -22,8 +22,6 @@ path:
       responses:
         200:
           $ref: "#/components/responses/200Index"
-        200NotFull:
-          $ref: "#/components/responses/200NotFull"
         400:
           $ref: "status.yml#/components/responses/400"
         500:
@@ -48,11 +46,6 @@ path:
           description: state of recipe
           schema:
             $ref: "#/components/schemas/recipeState"
-        - in: query
-          name: full
-          schema:
-            type: boolean
-            example: true
 
 
   /recipes/{id}:
@@ -481,7 +474,7 @@ components:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/getRecipe"
+              $ref: "#/components/schemas/getRecipeFeed"
 
     200Show:
       description: Successful operation
@@ -489,15 +482,6 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/getRecipe"
-
-    200NotFull:
-      description: Successful operation
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/getRecipeFeed"
 
     200PatchComment:
       description: Successful operation

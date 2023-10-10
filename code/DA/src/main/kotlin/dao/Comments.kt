@@ -5,13 +5,14 @@ import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.javatime.datetime
 
 object Comments : IntIdTable("comment") {
     val date = datetime("date")
     val text = text("text")
-    val autor = reference("autorid", Users)
-    val recipe = reference("recipeid", Recipes)
+    val autor = reference("autorid", Users, onDelete = ReferenceOption.CASCADE)
+    val recipe = reference("recipeid", Recipes, onDelete = ReferenceOption.CASCADE)
 }
 
 class CommentTable(id: EntityID<Int>) : IntEntity(id) {
@@ -27,5 +28,5 @@ class CommentTable(id: EntityID<Int>) : IntEntity(id) {
 }
 
 fun CommentTable.toEntity(): Comment = Comment(
-    id = this.id.value.toULong(), date = this.date, text = this.text, autor = this.autor.toEntity()
+    id = this.id.value, date = this.date, text = this.text, autor = this.autor.toEntity()
 )

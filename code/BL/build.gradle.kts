@@ -2,7 +2,7 @@ val logback_version: String by project
 val slf4j_version: String by project
 
 plugins {
-    kotlin("jvm") version "1.8.0"
+    kotlin("jvm") version "1.9.10"
 }
 
 group = "org.example"

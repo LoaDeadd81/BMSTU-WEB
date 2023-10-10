@@ -1,30 +1,15 @@
 package bl.repositories
 
-import bl.entities.Comment
-import bl.entities.Recipe
-import bl.entities.RecipePreview
+import bl.entities.*
 
-interface IRecipeRepository : IRepository<Recipe> {
-
-    fun getOwnerID(id: ULong): ULong
-
-    fun addToFavorite(id: ULong, userID: ULong)
-    fun deleteFromFavorite(id: ULong, userID: ULong)
-    fun isInFavorite(id: ULong, userID: ULong): Boolean
-
-    fun addComment(userId: ULong, recipeId: ULong, comment: Comment)
-
-    fun addToPublishQueue(id: ULong)
-
+interface IRecipeRepository {
+    fun create(obj: Recipe): Int
+    fun read(id: Int): Recipe
+    fun update(obj: Recipe)
+    fun delete(id: Int)
+    fun getAll(): List<RecipePreview>
+    fun updateInfo(obj: Recipe): Recipe
+    fun updateStages(id: Int, list: List<Stage>): Recipe
+    fun getOwnerID(id: Int): Int //todo
     fun getPublishQueue(): List<RecipePreview>
-
-    fun getSortedByDate(): List<RecipePreview>
-
-    fun isPublished(id: ULong): Boolean
-
-    fun approvePublication(id: ULong)
-
-    fun cancelPublication(id: ULong)
-
-    fun isInPublishQueue(id: ULong): Boolean
 }

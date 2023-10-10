@@ -1,96 +1,95 @@
 package bl.managers
 
-import bl.entities.Comment
 import bl.entities.Recipe
 import bl.entities.RecipePreview
+import bl.entities.RecipeState
 import bl.entities.Stage
-import bl.exceptions.*
+import bl.exceptions.AccessDeniedException
+import bl.exceptions.NotAuthorizedException
+import bl.exceptions.ValidationException
 import bl.repositories.IRecipeRepository
-import bl.repositories.IRepository
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 
-object RecipeManager : ICRUDManager<Recipe> {
+object RecipeManager {
     private lateinit var repository: IRecipeRepository
 
     private val logger = LoggerFactory.getLogger("mainLogger")
 
-    override fun registerRepository(repository: IRepository<Recipe>) {
-        this.repository = repository as IRecipeRepository
+    fun registerRepository(repository: IRecipeRepository) {
+        this.repository = repository
     }
 
-    override fun create(obj: Recipe) {
+    fun create(obj: Recipe): Int {
         logger.trace("{} called with parameters {}", ::create.name, obj)
 
         AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!isUniq(obj)) throw AlreadyExistingRecipeException("Recipe already exists")
-        if (!validate(obj)) throw ValidationRecipeException("Recipe failed validation")
+        if (!validate(obj)) throw ValidationException("Recipe failed validation")
         for (i in obj.stages) {
-            if (!validateStage(i)) throw ValidationIngredientException("Stage failed validation")
+            if (!validateStage(i)) throw ValidationException("Stage failed validation")
         }
 
-        repository.create(obj)
+        return repository.create(obj)
     }
 
-    override fun read(id: ULong): Recipe {
+    fun read(id: Int): Recipe {
         logger.trace("{} called with parameters {}", ::read.name, id)
 
-        if (!isExist(id)) throw NotExistingRecipeException("Recipe not exists")
         val recipe = repository.read(id)
-        val uId = AccountService.getCurrentUserId()
-        if (!recipe.published && (uId != null && !UserManager.isAdmin(uId) && !isOwner(id, uId)))
+        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
+        if (recipe.state != RecipeState.PUBLISHED && !UserManager.isAdmin(uId) && !isOwner(id, uId))
             throw AccessDeniedException("Access denied")
 
         return recipe
     }
 
-    override fun update(obj: Recipe) {
+    fun update(obj: Recipe) {
         logger.trace("{} called with parameters {}", ::update.name, obj)
 
         val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!UserManager.isAdmin(uId) && !isOwner(obj.id, uId)) throw AccessDeniedException("Access denied")
-        if (!isExist(obj.id)) throw NotExistingRecipeException("Recipe not exists")
-        if (!validate(obj)) throw ValidationRecipeException("Recipe failed validation")
+        if (!UserManager.isAdmin(uId)) throw AccessDeniedException("Access denied")
+        if (!validate(obj)) throw ValidationException("Recipe failed validation")
 
         repository.update(obj)
     }
 
-    override fun delete(id: ULong) {
+    fun delete(id: Int) {
         logger.trace("{} called with parameters {}", ::delete.name, id)
 
         val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
         if (!UserManager.isAdmin(uId) && !isOwner(id, uId)) throw AccessDeniedException("Access denied")
-        if (!isExist(id)) throw NotExistingRecipeException("Recipe not exists")
 
         repository.delete(id)
     }
 
-    override fun getAll(): List<Recipe> {
-//        logger.trace("{} called", ::getAll.name)
-//
-//        return repository.getAll()
-        TODO()
+    fun getAll(): List<RecipePreview> {
+        logger.trace("{} called", ::getAll.name)
+
+        return repository.getAll()
     }
 
-    override fun isUniq(obj: Recipe) = true
+    fun updateInfo(obj: Recipe): Recipe {
+        logger.trace("{} called with parameters {}", ::updateInfo.name, obj)
 
-    override fun isExist(id: ULong): Boolean {
-        logger.trace("{} called with parameters {}", ::isExist.name, id)
+        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
+        if (!UserManager.isAdmin(uId) && !isOwner(obj.id, uId)) throw AccessDeniedException("Access denied")
+        if (!validate(obj)) throw ValidationException("Recipe failed validation")
+        if (!UserManager.isAdmin(uId) && (obj.state == RecipeState.CLOSE || obj.state == RecipeState.PUBLISHED)) throw AccessDeniedException(
+            "Access denied"
+        )
 
-        return repository.exists(id)
+        return repository.updateInfo(obj)
     }
 
-    override fun validate(obj: Recipe): Boolean {
-        logger.trace("{} called with parameters {}", ::validate.name, obj)
+    fun updateStages(id: Int, list: List<Stage>): Recipe {
+        logger.trace("{} called with parameters {}, {}", ::updateInfo.name, id, list)
 
-        return obj.name.isNotEmpty() && obj.description.isNotEmpty() && obj.time > 0u && obj.servingsNum > 0u &&
-                obj.stages.isNotEmpty()
-    }
+        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
+        if (!UserManager.isAdmin(uId) && !isOwner(id, uId)) throw AccessDeniedException("Access denied")
+        for (i in list) {
+            if (!validateStage(i)) throw ValidationException("Stage failed validation")
+        }
 
-    private fun validateStage(obj: Stage): Boolean {
-        logger.trace("{} called with parameters {}", ::validateStage.name, obj)
-
-        return obj.time > 0u && obj.description.isNotEmpty()
+        return repository.updateStages(id, list)
     }
 
     fun getPublishQueue(): List<RecipePreview> {
@@ -102,97 +101,22 @@ object RecipeManager : ICRUDManager<Recipe> {
         return repository.getPublishQueue()
     }
 
-    fun publish(id: ULong) {
-        logger.trace("{} called with parameters {}", ::publish.name, id)
+    private fun validate(obj: Recipe): Boolean {
+        logger.trace("{} called with parameters {}", ::validate.name, obj)
 
-        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!UserManager.isAdmin(uId) && !isOwner(id, uId)) throw AccessDeniedException("Access denied")
-        if (!isExist(id)) throw NotExistingRecipeException("Recipe not exists")
-        if (isPublished(id)) throw RecipeAlreadyPublishedException("Recipe already published")
-        if (isInPublishQueue(id)) return
-
-        repository.addToPublishQueue(id)
+        return obj.name.isNotEmpty() && obj.description.isNotEmpty() && obj.time > -1 && obj.servingsNum > 0 &&
+                obj.pfc.protein > -1 && obj.pfc.fat > -1 && obj.pfc.carbon > -1
     }
 
-    fun approvePublication(id: ULong) {
-        logger.trace("{} called with parameters {}", ::approvePublication.name, id)
+    private fun validateStage(obj: Stage): Boolean {
+        logger.trace("{} called with parameters {}", ::validateStage.name, obj)
 
-        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!UserManager.isAdmin(uId)) throw AccessDeniedException("Access denied")
-        if (!isExist(id)) throw NotExistingRecipeException("Recipe not exists")
-        if (!isInPublishQueue(id)) throw RecipeNotInPublishQueueException("Recipe not in publish queue")
-
-        repository.approvePublication(id)
+        return obj.time > 0 && obj.description.isNotEmpty() && obj.orderNum > -1
     }
 
-    fun cancelRecipePublication(id: ULong) {
-        logger.trace("{} called with parameters {}", ::cancelRecipePublication.name, id)
-
-        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!UserManager.isAdmin(uId)) throw AccessDeniedException("Access denied")
-        if (!isExist(id)) throw NotExistingRecipeException("Recipe not exists")
-        if (!isInPublishQueue(id)) throw RecipeNotInPublishQueueException("Recipe not in publish queue")
-
-        repository.cancelPublication(id)
-    }
-
-    fun addToFavorite(id: ULong, userID: ULong) {
-        logger.trace("{} called with parameters {}, {}", ::addToFavorite.name, id, userID)
-
-        AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!isExist(id)) throw NotExistingRecipeException("Recipe not exist")
-        if (!UserManager.isExist(userID)) throw NotExistingUserException("User not exist")
-        if (isInFavorite(id, userID)) return
-
-        repository.addToFavorite(id, userID)
-    }
-
-    fun isInFavorite(id: ULong, userID: ULong): Boolean {
-        logger.trace("{} called with parameters {}, {}", ::isInFavorite.name, id, userID)
-
-        return repository.isInFavorite(id, userID)
-    }
-
-    fun deleteFromFavorite(id: ULong, userID: ULong) {
-        logger.trace("{} called with parameters {}, {}", ::deleteFromFavorite.name, id, userID)
-
-        return repository.deleteFromFavorite(id, userID)
-    }
-
-
-    fun isOwner(id: ULong, userID: ULong): Boolean {
+    private fun isOwner(id: Int, userID: Int): Boolean {
         logger.trace("{} called with parameters {}, {}", ::isOwner.name, id, userID)
 
-        if (!isExist(id)) throw NotExistingRecipeException("Recipe not exist")
-        if (!UserManager.isExist(userID)) throw NotExistingUserException("User not exist")
-
         return repository.getOwnerID(id) == userID
-    }
-
-    fun addComment(userID: ULong, text: String, recipeID: ULong) {
-        logger.trace("{} called with parameters {}, {}, {}", ::addComment.name, userID, text, recipeID)
-
-        AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!UserManager.isExist(userID)) throw NotExistingUserException("User not exists")
-        if (!isExist(recipeID)) throw NotExistingRecipeException("Recipe not exists")
-
-        val owner = UserManager.read(userID)
-        val comment = Comment(0u, LocalDateTime.now(), text, owner)
-
-        if (!CommentManager.validate(comment)) throw ValidationCommentException("Comment failed validation")
-
-        repository.addComment(userID, recipeID, comment)
-    }
-
-    private fun isInPublishQueue(id: ULong): Boolean {
-        logger.trace("{} called with parameters {}", ::isInPublishQueue.name, id)
-
-        return repository.isInPublishQueue(id)
-    }
-
-    private fun isPublished(id: ULong): Boolean {
-        logger.trace("{} called with parameters {}", ::isPublished.name, id)
-
-        return repository.isPublished(id)
     }
 }
