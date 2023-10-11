@@ -12,4 +12,8 @@ interface IRecipeRepository {
     fun updateStages(id: Int, list: List<Stage>): Recipe
     fun getOwnerID(id: Int): Int //todo
     fun getPublishQueue(): List<RecipePreview>
+    fun getSavedRecipes(userID: Int): List<RecipePreview>
+    fun getOwnRecipes(userID: Int): List<RecipePreview>
+    fun getPublishedRecipes(userID: Int): List<RecipePreview>
+
 }

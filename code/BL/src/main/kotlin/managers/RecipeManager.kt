@@ -8,6 +8,7 @@ import bl.exceptions.AccessDeniedException
 import bl.exceptions.NotAuthorizedException
 import bl.exceptions.ValidationException
 import bl.repositories.IRecipeRepository
+import exceptions.IllegalArguments
 import org.slf4j.LoggerFactory
 
 object RecipeManager {
@@ -61,10 +62,32 @@ object RecipeManager {
         repository.delete(id)
     }
 
-    fun getAll(): List<RecipePreview> {
+    fun getAll(userID: Int?, saved: Boolean?, st: String?): List<RecipePreview> {
         logger.trace("{} called", ::getAll.name)
 
-        return repository.getAll()
+        val uId = AccountService.getCurrentUserId()
+
+        if (userID == null) {
+            if (st != null) {
+                val state = RecipeState.valueOf(st)
+                return if (state == RecipeState.PUBLISHED) repository.getAll()
+                else {
+                    if (state == RecipeState.READY_TO_PUBLISH && uId != null && UserManager.isAdmin(uId)) repository.getPublishQueue()
+                    else throw AccessDeniedException("Access denied")
+                }
+            } else if (saved != null) throw IllegalArguments("It is not possible to request saved recipes without specifying the user")
+        } else {
+            return if (uId != null && uId == userID && saved == null && st == null) repository.getOwnRecipes(userID)
+            else if (uId != null && uId == userID && saved != null && saved == true && st == null) repository.getSavedRecipes(
+                userID
+            )
+            else if (saved == null && st != null && RecipeState.valueOf(st) == RecipeState.PUBLISHED) repository.getPublishedRecipes(
+                userID
+            )
+            else throw IllegalArguments("Illegal arguments")
+        }
+
+        throw IllegalArguments("Illegal arguments")
     }
 
     fun updateInfo(obj: Recipe): Recipe {

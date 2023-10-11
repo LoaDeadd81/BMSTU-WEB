@@ -7,6 +7,7 @@ import api.dto.requests.recipe.UpdateRecipe
 import api.dto.requests.recipe.UpdateRecipeInfo
 import api.dto.requests.recipe.UpdateRecipeStages
 import api.dto.responces.recipe.CommentResponse
+import api.dto.responces.recipe.RecipePreviewResponse
 import api.dto.responces.recipe.RecipeResponse
 import api.dto.responces.user.UserResponse
 import bl.managers.AccountService
@@ -16,6 +17,7 @@ import io.ktor.http.*
 import io.ktor.resources.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
 import io.ktor.server.resources.patch
@@ -25,7 +27,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 @Resource("/recipes")
-class Recipes(val user_id: Int?, val saved: Boolean?, val state: String?) {
+class Recipes(val user_id: Int? = null, val saved: Boolean? = null, val state: String? = null) {
     @Resource("{id}")
     class Id(val parent: Recipes, val id: Int) {
         @Resource("info")
@@ -44,7 +46,7 @@ class Recipes(val user_id: Int?, val saved: Boolean?, val state: String?) {
 
 fun Route.recipes() {
     authenticate("auth") {
-        post<Recipes> { req ->
+        post<Recipes> {
             AccountService.setId(getId(call))
             val data = call.receive<StoreRecipe>()
 
@@ -53,23 +55,21 @@ fun Route.recipes() {
             call.respondText("$host/recipes/$id", status = HttpStatusCode.Created)
         }
     }
-//    get<Recipes>{req ->
-//        val principal = call.principal<JWTPrincipal>()
-//        val uId = principal!!.payload.getClaim("id").asInt()
-//
-//        val userId = req.user_id
-//        val saved = req.saved
-//        val state = req.state
-//
-//        if(userId == null && saved != null) call.respond(HttpStatusCode.BadRequest, "")
-//        if (userId != null){
-//            if (userId)
-//        }
-//
-//        val recipes = RecipeManager.getAll().map { RecipePreviewResponce(it) }
-//
-//        call.respond(recipes)
-//    }
+    authenticate("auth", optional = true) {
+        get<Recipes> { req ->
+            val userId = req.user_id
+            val saved = req.saved
+            val state = req.state
+
+            val uId = call.principal<JWTPrincipal>()?.payload?.getClaim("id")?.asInt()
+            if (uId != null)
+                AccountService.setId(uId)
+
+            val recipes = RecipeManager.getAll(userId, saved, state).map { RecipePreviewResponse(it) }
+
+            call.respond(recipes)
+        }
+    }
     get<Recipes.Id> { req ->
         val id = req.id
 
@@ -120,7 +120,7 @@ fun Route.recipes() {
 
             val cId = CommentManager.create(uid, data.text, id)
 
-            call.respondText("", status = HttpStatusCode.Created)
+            call.respondText("$host/comments/$cId", status = HttpStatusCode.Created)
         }
         put<Recipes.Id.Comments.CommentId> { req ->
             AccountService.setId(getId(call))

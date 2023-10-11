@@ -507,6 +507,8 @@ paths:
         500:
           description: Failed
     get:
+      security:
+        - bearerAuth: [ ]
       tags:
         - recipe
       summary: Get all recipes
@@ -576,13 +578,11 @@ paths:
             type: integer
             format: int64
             minimum: 1
-            example: 1
         - in: query
           name: saved
           description: filter for saved recipes
           schema:
             type: boolean
-            example: true
         - in: query
           name: state
           description: state of recipe
@@ -592,7 +592,6 @@ paths:
               - CLOSE
               - READY_TO_PUBLISH
               - PUBLISHED
-            example: CLOSE
 
 
   /recipes/{id}:

@@ -15,8 +15,6 @@ interface IUserRepository {
     fun isInFavorite(id: Int, recipeId: Int): Boolean
     fun isLoginNotExist(login: String): Boolean
     fun isAdmin(id: Int): Boolean
-    fun getSavedRecipes(userID: Int): List<RecipePreview>
-    fun getOwnRecipes(userID: Int): List<RecipePreview>
-    fun getPublishedRecipes(userID: Int): List<RecipePreview>
     fun getByLogin(login: String): User
+    fun getPublishedRecipes(userID: Int): List<RecipePreview>
 }

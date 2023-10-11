@@ -85,7 +85,7 @@ object UserManager {
         repository.deleteFromFavorite(id, recipeId)
     }
 
-    fun isInFavorite(id: Int, recipeId: Int) {
+    fun isInFavorite(id: Int, recipeId: Int) { //todo add ro resp
         logger.trace("{} called with parameters {}, {}", ::isInFavorite.name, id, recipeId)
 
         val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
@@ -94,24 +94,24 @@ object UserManager {
         repository.isInFavorite(id, recipeId)
     }
 
-    fun getSavedRecipes(userId: Int): List<RecipePreview> {
-        logger.trace("{} called with parameters {}", ::getSavedRecipes.name, userId)
-
-        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (!isAdmin(uId) && uId != userId) throw AccessDeniedException("Access denied")
-
-        return repository.getSavedRecipes(userId)
-    }
-
-    fun getOwnRecipes(userId: Int): List<RecipePreview> {
-        logger.trace("{} called with parameters {}", ::getOwnRecipes.name, userId)
-
-        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (uId != userId && !isAdmin(uId)) throw AccessDeniedException("Access denied")
-
-        return repository.getOwnRecipes(userId)
-    }
-
+    //    fun getSavedRecipes(userId: Int): List<RecipePreview> {
+//        logger.trace("{} called with parameters {}", ::getSavedRecipes.name, userId)
+//
+//        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
+//        if (!isAdmin(uId) && uId != userId) throw AccessDeniedException("Access denied")
+//
+//        return repository.getSavedRecipes(userId)
+//    }
+//
+//    fun getOwnRecipes(userId: Int): List<RecipePreview> {
+//        logger.trace("{} called with parameters {}", ::getOwnRecipes.name, userId)
+//
+//        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
+//        if (uId != userId && !isAdmin(uId)) throw AccessDeniedException("Access denied")
+//
+//        return repository.getOwnRecipes(userId)
+//    }
+//
     fun getPublishedRecipes(userID: Int): List<RecipePreview> {
         logger.trace("{} called with parameters {}", ::getPublishedRecipes.name, userID)
 

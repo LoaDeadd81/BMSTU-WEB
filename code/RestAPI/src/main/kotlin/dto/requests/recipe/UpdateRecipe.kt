@@ -21,7 +21,7 @@ class UpdateRecipe(
 ) {
     fun toBLEntity(id: Int): Recipe {
         return Recipe(
-            0,
+            id,
             name,
             description,
             time,

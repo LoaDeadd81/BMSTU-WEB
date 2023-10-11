@@ -144,7 +144,8 @@ class PgRecipeRepository : IRecipeRepository {
         logger.trace("{} called", ::getAll.name)
 
         return transaction {
-            RecipePreviewTable.all().sortedByDescending { it.date }.map { it.toEntity() }
+            RecipePreviewTable.find { Recipes.state eq RecipeState.PUBLISHED.value }.sortedByDescending { it.date }
+                .map { it.toEntity() }
         }
     }
 
@@ -206,11 +207,39 @@ class PgRecipeRepository : IRecipeRepository {
         }
     }
 
-    override fun getPublishQueue(): List<RecipePreview> {
+    override fun getPublishQueue(): List<RecipePreview> { // ready to publish
         logger.trace("{} called", ::getPublishQueue.name)
 
         return transaction {
-            RecipePreviewTable.find { Recipes.state eq RecipeState.PUBLISHED.value }.map { it.toEntity() }
+            RecipePreviewTable.find { Recipes.state eq RecipeState.READY_TO_PUBLISH.value }.map { it.toEntity() }
+        }
+    }
+
+    override fun getSavedRecipes(userID: Int): List<RecipePreview> { // id + saved
+        logger.trace("{} called with parameters {}", ::getSavedRecipes.name, userID)
+
+        return transaction {
+            UserTable.findById(userID)?.savedRecipesPreview?.map { it.toEntity() }
+                ?: throw NotFoundException("User with id = $id not found")
+        }
+    }
+
+    override fun getOwnRecipes(userID: Int): List<RecipePreview> { // id
+        logger.trace("{} called with parameters {}", ::getOwnRecipes.name, userID)
+
+        return transaction {
+            UserTable.findById(userID)?.recipesPreview?.map { it.toEntity() }
+                ?: throw NotFoundException("User with id = $id not found")
+        }
+    }
+
+    override fun getPublishedRecipes(userID: Int): List<RecipePreview> { //id + published
+        logger.trace("{} called with parameters {}", ::getPublishedRecipes.name, userID)
+
+        return transaction {
+            val query = Recipes.innerJoin(Users).slice(Recipes.columns)
+                .select((Users.id eq userID) and (Recipes.state eq RecipeState.PUBLISHED.value))
+            RecipePreviewTable.wrapRows(query).map { it.toEntity() }
         }
     }
 }

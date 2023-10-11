@@ -1,6 +1,7 @@
 package api.plugins
 
 import bl.exceptions.*
+import exceptions.IllegalArguments
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.NotFoundException
@@ -25,6 +26,8 @@ fun Application.configureStatusCodes() {
                 call.respond(HttpStatusCode.Unauthorized, cause.message ?: "")
             } else if (cause is NotAuthorizedException) {
                 call.respond(HttpStatusCode.Unauthorized, cause.message ?: "")
+            } else if (cause is IllegalArguments) {
+                call.respond(HttpStatusCode.BadRequest, cause.message ?: "")
             } else {
                 call.respond(HttpStatusCode.InternalServerError)
             }

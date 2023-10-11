@@ -134,40 +134,22 @@ class PgUserRepository : IUserRepository {
         }
     }
 
-    override fun getSavedRecipes(userID: Int): List<RecipePreview> {
-        logger.trace("{} called with parameters {}", ::getSavedRecipes.name, userID)
-
-        return transaction {
-            UserTable.findById(userID)?.savedRecipesPreview?.map { it.toEntity() }
-                ?: throw NotFoundException("User with id = $id not found")
-        }
-    }
-
-    override fun getOwnRecipes(userID: Int): List<RecipePreview> {
-        logger.trace("{} called with parameters {}", ::getOwnRecipes.name, userID)
-
-        return transaction {
-            UserTable.findById(userID)?.recipesPreview?.map { it.toEntity() }
-                ?: throw NotFoundException("User with id = $id not found")
-        }
-    }
-
-    override fun getPublishedRecipes(userID: Int): List<RecipePreview> {
-        logger.trace("{} called with parameters {}", ::getPublishedRecipes.name, userID)
-
-        return transaction {
-            val query = Recipes.innerJoin(Users).slice(Recipes.columns)
-                .select((Users.id eq userID) and (Recipes.state eq RecipeState.PUBLISHED.value))
-            RecipePreviewTable.wrapRows(query).map { it.toEntity() }
-        }
-    }
-
     override fun getByLogin(login: String): User {
         logger.trace("{} called with parameters {}", ::getByLogin.name, login)
 
         return transaction {
             UserTable.find { Users.login eq login }.firstOrNull()?.toEntity()
                 ?: throw NotFoundException("User with id = $id not found")
+        }
+    }
+
+    override fun getPublishedRecipes(userID: Int): List<RecipePreview> { //id + published
+        logger.trace("{} called with parameters {}", ::getPublishedRecipes.name, userID)
+
+        return transaction {
+            val query = Recipes.innerJoin(Users).slice(Recipes.columns)
+                .select((Users.id eq userID) and (Recipes.state eq RecipeState.PUBLISHED.value))
+            RecipePreviewTable.wrapRows(query).map { it.toEntity() }
         }
     }
 }
