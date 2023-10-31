@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  postgres:
+  db:
     image: postgres
     environment:
       POSTGRES_USER: "${DB_USER}"
@@ -8,6 +8,22 @@ services:
       POSTGRES_DB: "${DB_NAME}"
       PGDATA: "/home/postgres/pgdata"
     volumes:
-      - ./db/data:/home/postgres/pgdata
+      - pgdata:/home/postgres/pgdata
     ports:
       - "${DB_PORT}:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "${PG_ADMIN_PORT}:80"
+    depends_on:
+      - db
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+
+volumes:
+  pgadmin:
+  pgdata:

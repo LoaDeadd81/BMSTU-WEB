@@ -12,8 +12,8 @@ import io.ktor.server.netty.*
 
 
 class RestApi {
-    fun run() {
-        embeddedServer(Netty, port = 8089, host = "0.0.0.0", module = Application::module)
+    fun run(port: Int) {
+        embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
             .start(wait = true)
     }
 }

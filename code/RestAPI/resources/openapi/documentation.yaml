@@ -3,6 +3,8 @@ info:
   title: KApp
   version: "1.0"
 servers:
+  - url: http://localhost:8888/api/v1
+    description: nginx
   - url: http://0.0.0.0:8089/api/v1
     description: dev stand
 tags:

@@ -25,11 +25,11 @@
 
 ### Вход в приложение
 
-![BPMN вход в приложение](./img/reg.svg)
+![BPMN вход в приложение](./img/reg.png)
 
 ### Добавление рецепта
 
-![BPMN добавление рецепта](./img/diagram.svg)
+![BPMN добавление рецепта](./img/diagram.png)
 
 ## 5. Основные пользовательские сценарии
 
@@ -53,15 +53,15 @@
 
 ## 8. Компонентная диаграмма системы
 
-![UML](./img/UML.svg)
+![UML](./img/UML.png)
 
 ## 9. Экраны будущего web-приложения
 
 [Figma](https://www.figma.com/file/hftAGuGw9TOoDvvYFdvowX/BMSTU-WEB?type=design&node-id=0%3A1&mode=design&t=mHMGGWuZxwOvkou0-1)
 
-![Экран_входа](./img/Экран_входа.svg)
-![Лента](./img/Лента.svg)
-![Рецепт](./img/Рецепт.svg)
-![Профиль](./img/Профиль.svg)
-![Очередь](./img/Очередь.svg)
-![Создание рецепта.svg](./img/Создание_рецепта.svg)
+![Экран_входа](./img/login_screen.png)
+![Лента](./img/feed.png)
+![Рецепт](./img/recipe.png)
+![Профиль](./img/profile.png)
+![Очередь](./img/queue.png)
+![Создание рецепта.svg](./img/creating_recipe.png)

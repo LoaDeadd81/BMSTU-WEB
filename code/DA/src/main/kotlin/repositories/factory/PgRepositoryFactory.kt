@@ -17,12 +17,14 @@ class PgRepositoryFactory(private val schemaRep: String) : IRepositoryFactory {
 
     init {
         val dotenv = dotenv()
+        val login = System.getenv("LOGIN") ?: dotenv["DB_USER"]
+        val pass = System.getenv("PASS") ?: dotenv["DB_PASSWORD"]
         val hikariConfig = HikariConfig().apply {
             jdbcUrl = "jdbc:" + dotenv["DB_CONNECT"] + "://" + dotenv["DB_HOST"] + ":" +
                     dotenv["DB_PORT"] + "/" + dotenv["DB_NAME"] + "?currentSchema=" + schemaRep
             driverClassName = "org.postgresql.Driver"
-            username = dotenv["DB_USER"]
-            password = dotenv["DB_PASSWORD"]
+            username = login
+            password = pass
             maximumPoolSize = 3
             isAutoCommit = false
             transactionIsolation = "TRANSACTION_REPEATABLE_READ"

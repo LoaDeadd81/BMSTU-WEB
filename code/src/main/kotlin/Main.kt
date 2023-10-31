@@ -1,8 +1,10 @@
 package main
 
 import api.RestApi
-import api.module
-import bl.managers.*
+import bl.managers.CommentManager
+import bl.managers.IngredientManager
+import bl.managers.RecipeManager
+import bl.managers.UserManager
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.LoggerContext
@@ -75,8 +77,9 @@ fun main() {
         RecipeManager.registerRepository(repositoryFactory.createRecipeRepository())
         UserManager.registerRepository(repositoryFactory.createUserRepository())
 
+        val port = System.getenv("PORT").toInt()
         val api = RestApi()
-        api.run()
+        api.run(port)
 
     } catch (e: HikariPool.PoolInitializationException) {
         println("Не удалось подключиться к БД")
