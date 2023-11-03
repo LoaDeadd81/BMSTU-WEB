@@ -1,0 +1,66 @@
+2023/11/03 12:15:22 [notice] 38#38: signal process started
+2023/11/03 12:15:30 [info] 29#29: *2 client timed out (110: Connection timed out) while waiting for request, client: 192.168.64.1, server: 0.0.0.0:8080
+2023/11/03 12:18:05 [notice] 41#41: signal process started
+2023/11/03 12:19:40 [notice] 43#43: signal process started
+2023/11/03 12:20:49 [info] 44#44: *6 client timed out (110: Connection timed out) while waiting for request, client: 192.168.64.1, server: 0.0.0.0:8080
+2023/11/03 12:21:10 [notice] 45#45: signal process started
+2023/11/03 12:22:15 [info] 46#46: *11 client timed out (110: Connection timed out) while waiting for request, client: 192.168.64.1, server: 0.0.0.0:8080
+2023/11/03 12:22:28 [notice] 47#47: signal process started
+2023/11/03 12:22:32 [error] 48#48: *17 invalid URL prefix in "GET", client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 12:27:56 [emerg] 49#49: "log_format" directive is not allowed here in /etc/nginx/nginx.conf:29
+2023/11/03 12:28:14 [emerg] 50#50: "log_format" directive is not allowed here in /etc/nginx/nginx.conf:27
+2023/11/03 12:28:36 [notice] 51#51: signal process started
+2023/11/03 12:28:40 [error] 52#52: *18 invalid URL prefix in "GET", client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 12:29:03 [notice] 53#53: signal process started
+2023/11/03 12:29:55 [notice] 55#55: signal process started
+2023/11/03 12:30:12 [notice] 57#57: signal process started
+2023/11/03 12:31:07 [notice] 59#59: signal process started
+2023/11/03 12:32:22 [notice] 61#61: signal process started
+2023/11/03 13:13:07 [notice] 63#63: signal process started
+2023/11/03 13:13:21 [notice] 65#65: signal process started
+2023/11/03 13:15:36 [notice] 67#67: signal process started
+2023/11/03 13:15:52 [notice] 69#69: signal process started
+2023/11/03 13:18:13 [notice] 71#71: signal process started
+2023/11/03 13:18:44 [notice] 73#73: signal process started
+2023/11/03 13:18:57 [notice] 75#75: signal process started
+2023/11/03 13:19:02 [notice] 77#77: signal process started
+2023/11/03 13:19:33 [notice] 79#79: signal process started
+2023/11/03 13:21:37 [emerg] 81#81: unknown "request_url" variable
+2023/11/03 13:22:04 [notice] 82#82: signal process started
+2023/11/03 13:22:08 [error] 83#83: *54 no resolver defined to resolve web1, client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 13:23:19 [notice] 84#84: signal process started
+2023/11/03 13:23:29 [notice] 86#86: signal process started
+2023/11/03 13:23:31 [error] 87#87: *55 no resolver defined to resolve web1, client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 13:24:01 [notice] 88#88: signal process started
+2023/11/03 13:29:06 [notice] 90#90: signal process started
+2023/11/03 13:29:09 [error] 91#91: *58 no resolver defined to resolve web1, client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 13:29:21 [notice] 92#92: signal process started
+2023/11/03 13:29:22 [error] 93#93: *59 invalid URL prefix in "web1:8080", client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 13:29:40 [notice] 94#94: signal process started
+2023/11/03 13:29:42 [error] 95#95: *60 invalid URL prefix in "web1:8080/api/v1/users", client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 13:29:54 [notice] 96#96: signal process started
+2023/11/03 13:29:55 [error] 97#97: *61 no resolver defined to resolve web1, client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 13:30:28 [notice] 98#98: signal process started
+2023/11/03 13:30:31 [error] 99#99: *62 no resolver defined to resolve web1, client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 13:30:32 [error] 99#99: *62 no resolver defined to resolve web1, client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 13:31:25 [notice] 100#100: signal process started
+2023/11/03 13:31:34 [error] 101#101: *63 no resolver defined to resolve web1, client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 13:31:42 [error] 101#101: *63 no resolver defined to resolve web1, client: 192.168.64.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 13:34:07 [notice] 102#102: signal process started
+2023/11/03 13:48:19 [notice] 39#39: signal process started
+2023/11/03 13:49:02 [notice] 41#41: signal process started
+2023/11/03 13:51:01 [notice] 43#43: signal process started
+2023/11/03 13:52:55 [notice] 45#45: signal process started
+2023/11/03 13:54:12 [notice] 47#47: signal process started
+2023/11/03 14:27:44 [notice] 38#38: signal process started
+2023/11/03 14:28:14 [notice] 40#40: signal process started
+2023/11/03 14:30:28 [error] 41#41: *14 upstream timed out (110: Connection timed out) while reading response header from upstream, client: 192.168.144.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", upstream: "http://192.168.144.4:8080/api/v1/users", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 14:33:40 [notice] 42#42: signal process started
+2023/11/03 14:41:39 [error] 43#43: *26 upstream timed out (110: Connection timed out) while reading response header from upstream, client: 192.168.144.1, server: localhost, request: "GET /api/v1/users HTTP/1.1", upstream: "http://192.168.144.4:8080/api/v1/", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 14:43:47 [notice] 38#38: signal process started
+2023/11/03 14:45:04 [notice] 40#40: signal process started
+2023/11/03 14:48:27 [notice] 42#42: signal process started
+2023/11/03 14:50:57 [error] 43#43: *20 upstream timed out (110: Connection timed out) while reading response header from upstream, client: 192.168.192.1, server: localhost, request: "POST /api/v1/auth/login HTTP/1.1", upstream: "http://192.168.192.3:8080/api/v1/auth/login", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/03 14:53:11 [notice] 44#44: signal process started
+2023/11/03 14:53:23 [notice] 46#46: signal process started
+2023/11/03 14:53:24 [notice] 48#48: signal process started

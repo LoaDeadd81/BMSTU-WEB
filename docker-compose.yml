@@ -1,0 +1,132 @@
+version: "3.9"
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: "${DB_USER_OUT}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD_OUT}"
+      POSTGRES_DB: "${DB_NAME}"
+      PGDATA: ${PG_DATA}
+    volumes:
+      - pgdata:${PG_DATA}
+      - ./src/docker/db:/docker-entrypoint-initdb.d/
+    ports:
+      - "${DB_PORT_OUT}:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d ${DB_NAME}" ]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - db_net
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PG_ADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PG_ADMIN_PASS}
+    ports:
+      - "${PG_ADMIN_PORT}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin:${PG_ADMIN_DATA}
+    networks:
+      - db_net
+      - proxy
+
+  web1:
+    build: src/docker/web
+    volumes:
+      - ./src/code/build/libs:${APP_PATH}
+      - ./src/code/RestAPI/resources/openapi:${OPEN_API_PATH}
+    env_file:
+      - src/.env
+    environment:
+      - DB_USER=${DB_USER_WEB_1}
+      - DB_PASSWORD=${DB_PASSWORD_WEB_1}
+      - JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    expose:
+      - ${PORT}
+      - 5005
+    ports:
+      - ${PORT_WEB_1}:${PORT}
+      - "5005:5005"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - db_net
+      - proxy
+
+  web2:
+    build: src/docker/web
+    volumes:
+      - ./src/code/build/libs:${APP_PATH}
+      - ./src/code/RestAPI/resources/openapi:${OPEN_API_PATH}
+    env_file:
+      - src/.env
+    environment:
+      - DB_USER=${DB_USER_WEB_2}
+      - DB_PASSWORD=${DB_PASSWORD_WEB_2}
+    expose:
+      - ${PORT}
+    ports:
+      - ${PORT_WEB_2}:${PORT}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - db_net
+      - proxy
+
+  web3:
+    build: src/docker/web
+    volumes:
+      - ./src/code/build/libs:${APP_PATH}
+      - ./src/code/RestAPI/resources/openapi:${OPEN_API_PATH}
+    env_file:
+      - src/.env
+    environment:
+      - DB_USER=${DB_USER_WEB_3}
+      - DB_PASSWORD=${DB_PASSWORD_WEB_3}
+    expose:
+      - ${PORT}
+    ports:
+      - ${PORT_WEB_3}:${PORT}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - db_net
+      - proxy
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./src/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./README.md:/docs/README.md
+      - ./docs/img/:/img
+      - ./src/nginx/static:/static
+      - ./src/nginx/log:/var/log/nginx
+    ports:
+      - ${NGINX_PORT_OUT}:${NGINX_PORT}
+    networks:
+      - proxy
+    depends_on:
+      - pgadmin
+      - web1
+      - web2
+      - web3
+
+
+
+volumes:
+  pgadmin:
+  pgdata:
+
+networks:
+  db_net:
+  proxy:

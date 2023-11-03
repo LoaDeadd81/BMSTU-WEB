@@ -19,17 +19,17 @@
 
 ## 3. Use-Case - диаграмма
 
-![Use-Case диаграма](./img/UseCase.png)
+![Use-Case диаграма](docs/img/UseCase.png)
 
 ## 4. BPMN
 
 ### Вход в приложение
 
-![BPMN вход в приложение](./img/reg.png)
+![BPMN вход в приложение](docs/img/reg.png)
 
 ### Добавление рецепта
 
-![BPMN добавление рецепта](./img/diagram.png)
+![BPMN добавление рецепта](docs/img/diagram.png)
 
 ## 5. Основные пользовательские сценарии
 
@@ -45,23 +45,23 @@
 
 ## 6. ER-диаграмма сущностей
 
-![ER-диаграмма сущностей](./img/ER.png)
+![ER-диаграмма сущностей](docs/img/ER.png)
 
 ## 7. Диаграмма БД
 
-![сущности БД](./img/BD.png)
+![сущности БД](docs/img/BD.png)
 
 ## 8. Компонентная диаграмма системы
 
-![UML](./img/UML.png)
+![UML](docs/img/UML.png)
 
 ## 9. Экраны будущего web-приложения
 
 [Figma](https://www.figma.com/file/hftAGuGw9TOoDvvYFdvowX/BMSTU-WEB?type=design&node-id=0%3A1&mode=design&t=mHMGGWuZxwOvkou0-1)
 
-![Экран_входа](./img/login_screen.png)
-![Лента](./img/feed.png)
-![Рецепт](./img/recipe.png)
-![Профиль](./img/profile.png)
-![Очередь](./img/queue.png)
-![Создание рецепта.svg](./img/creating_recipe.png)
+![Экран_входа](docs/img/login_screen.png)
+![Лента](docs/img/feed.png)
+![Рецепт](docs/img/recipe.png)
+![Профиль](docs/img/profile.png)
+![Очередь](docs/img/queue.png)
+![Создание рецепта.svg](docs/img/creating_recipe.png)
