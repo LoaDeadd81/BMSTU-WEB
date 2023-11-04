@@ -46,7 +46,7 @@ fun Application.configureStatusCodes() {
                 }
 
                 else -> {
-                    call.respond(HttpStatusCode.InternalServerError)
+                    call.respond(HttpStatusCode.InternalServerError, message)
                 }
             }
         }

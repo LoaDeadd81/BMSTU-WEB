@@ -17,6 +17,7 @@ class PgRepositoryFactory(private val schemaRep: String) : IRepositoryFactory {
     init {
         val DB_CONNECT = System.getenv("DB_CONNECT") ?: throw Exception("no DB_CONNECT in env")
         val DB_HOST = System.getenv("DB_HOST") ?: throw Exception("no DB_HOST in env")
+        println("DB_HOST: $DB_HOST")
         val DB_PORT = System.getenv("DB_PORT") ?: throw Exception("no DB_PORT in env")
         val DB_NAME = System.getenv("DB_NAME") ?: throw Exception("no DB_NAME in env")
 

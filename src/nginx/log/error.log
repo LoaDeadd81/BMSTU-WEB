@@ -64,3 +64,32 @@
 2023/11/03 14:53:11 [notice] 44#44: signal process started
 2023/11/03 14:53:23 [notice] 46#46: signal process started
 2023/11/03 14:53:24 [notice] 48#48: signal process started
+2023/11/03 23:18:55 [emerg] 1#1: host not found in upstream "web1:8080" in /etc/nginx/nginx.conf:13
+2023/11/04 01:17:59 [error] 29#29: *1 open() "/static/favicon.ico" failed (2: No such file or directory), client: 192.168.64.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/api/v1/"
+2023/11/04 11:53:05 [notice] 31#31: signal process started
+2023/11/04 11:53:19 [error] 32#32: *1 open() "/static/mirror" failed (2: No such file or directory), client: 172.31.0.1, server: localhost, request: "GET /mirror HTTP/1.1", host: "localhost:8888"
+2023/11/04 11:53:19 [error] 32#32: *1 open() "/static/favicon.ico" failed (2: No such file or directory), client: 172.31.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/mirror"
+2023/11/04 12:35:11 [notice] 33#33: signal process started
+2023/11/04 12:36:23 [info] 34#34: *12 client timed out (110: Connection timed out) while waiting for request, client: 172.31.0.1, server: 0.0.0.0:8080
+2023/11/04 12:38:46 [info] 34#34: *16 client timed out (110: Connection timed out) while waiting for request, client: 172.31.0.1, server: 0.0.0.0:8080
+2023/11/04 12:40:38 [notice] 35#35: signal process started
+2023/11/04 12:40:57 [error] 36#36: *27 open() "/static/favicon.ico" failed (2: No such file or directory), client: 172.31.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/mirror1/api/v1"
+2023/11/04 12:41:15 [info] 36#36: *27 client 172.31.0.1 closed keepalive connection
+2023/11/04 12:41:15 [info] 36#36: *26 client closed connection while waiting for request, client: 172.31.0.1, server: 0.0.0.0:8080
+2023/11/04 12:41:59 [info] 36#36: *40 client closed connection while waiting for request, client: 172.31.0.1, server: 0.0.0.0:8080
+2023/11/04 12:42:34 [error] 29#29: *2 open() "/static/favicon.ico" failed (2: No such file or directory), client: 172.21.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/mirror1/api/v1"
+2023/11/04 12:46:59 [notice] 38#38: signal process started
+2023/11/04 12:47:04 [error] 39#39: *17 open() "/static/favicon.ico" failed (2: No such file or directory), client: 172.21.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:8888", referrer: "http://localhost:8888/mirror1/api/v1"
+2023/11/04 12:48:03 [info] 39#39: *18 client timed out (110: Connection timed out) while waiting for request, client: 172.21.0.1, server: 0.0.0.0:8080
+2023/11/04 13:36:48 [notice] 40#40: signal process started
+2023/11/04 13:37:52 [info] 41#41: *22 client timed out (110: Connection timed out) while waiting for request, client: 172.21.0.1, server: 0.0.0.0:8080
+2023/11/04 13:38:15 [emerg] 42#42: unknown directive "more_clear_headers" in /etc/nginx/nginx.conf:39
+2023/11/04 13:39:24 [emerg] 43#43: dlopen() "/etc/nginx/modules/ngx_http_headers_more_filter_module.so" failed (/etc/nginx/modules/ngx_http_headers_more_filter_module.so: cannot open shared object file: No such file or directory) in /etc/nginx/nginx.conf:1
+2023/11/04 13:40:28 [emerg] 1#1: dlopen() "/etc/nginx/modules/ngx_http_headers_more_filter_module.so" failed (/etc/nginx/modules/ngx_http_headers_more_filter_module.so: cannot open shared object file: No such file or directory) in /etc/nginx/nginx.conf:1
+2023/11/04 13:43:44 [notice] 14#14: signal process started
+2023/11/04 13:44:48 [info] 15#15: *2 client timed out (110: Operation timed out) while waiting for request, client: 172.27.0.1, server: 0.0.0.0:8080
+2023/11/04 13:52:07 [emerg] 16#16: unknown directive "if($request_method" in /etc/nginx/nginx.conf:92
+2023/11/04 13:52:27 [emerg] 17#17: "proxy_pass" cannot have URI part in location given by regular expression, or inside named location, or inside "if" statement, or inside "limit_except" block in /etc/nginx/nginx.conf:93
+2023/11/04 13:53:03 [notice] 18#18: signal process started
+2023/11/04 13:53:13 [notice] 20#20: signal process started
+2023/11/04 13:54:40 [notice] 22#22: signal process started

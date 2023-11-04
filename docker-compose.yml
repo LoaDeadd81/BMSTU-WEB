@@ -1,25 +1,58 @@
-version: "3.9"
+version: "3.8"
 services:
   db:
-    image: postgres
+    image: bitnami/postgresql
     environment:
-      POSTGRES_USER: "${DB_USER_OUT}"
-      POSTGRES_PASSWORD: "${DB_PASSWORD_OUT}"
-      POSTGRES_DB: "${DB_NAME}"
-      PGDATA: ${PG_DATA}
+      POSTGRESQL_PGAUDIT_LOG: READ,WRITE
+      POSTGRESQL_LOG_HOSTNAME: true
+      POSTGRESQL_REPLICATION_MODE: master
+      POSTGRESQL_REPLICATION_USER: ${PG_REPL_USER}
+      POSTGRESQL_REPLICATION_PASSWORD: ${PG_REPL_PASS}
+      POSTGRESQL_USERNAME: ${DB_USER_OUT}
+      POSTGRESQL_PASSWORD: ${DB_PASSWORD_OUT}
+      POSTGRESQL_DATABASE: ${DB_NAME}
     volumes:
-      - pgdata:${PG_DATA}
-      - ./src/docker/db:/docker-entrypoint-initdb.d/
+      - pgdata:/bitnami/postgresql
+      - ./src/docker/db/init:/docker-entrypoint-initdb.d/
     ports:
       - "${DB_PORT_OUT}:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d ${DB_NAME}" ]
-      interval: 1s
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER_OUT} -d ${DB_NAME}" ]
+      interval: 3s
       timeout: 5s
       retries: 5
       start_period: 5s
     networks:
+      - db_master
       - db_net
+
+  db-slave:
+    image: bitnami/postgresql
+    environment:
+      POSTGRESQL_PASSWORD: ${DB_PASSWORD_OUT}
+      POSTGRESQL_MASTER_HOST: db
+      POSTGRESQL_PGAUDIT_LOG: READ
+      POSTGRESQL_LOG_HOSTNAME: true
+      POSTGRESQL_REPLICATION_MODE: slave
+      POSTGRESQL_REPLICATION_USER: ${PG_REPL_USER}
+      POSTGRESQL_REPLICATION_PASSWORD: ${PG_REPL_PASS}
+      POSTGRESQL_MASTER_PORT_NUMBER: 5432
+      ALLOW_EMPTY_PASSWORD: yes
+    ports:
+      - "${PG_SLAVE_PORT_OUT}:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER_OUT} -d ${DB_NAME}" ]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - db_net
+      - db_slave
+
 
   pgadmin:
     image: dpage/pgadmin4
@@ -31,10 +64,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      db-slave:
+        condition: service_healthy
     volumes:
       - pgadmin:${PG_ADMIN_DATA}
     networks:
-      - db_net
+      - db_master
       - proxy
 
   web1:
@@ -45,6 +80,7 @@ services:
     env_file:
       - src/.env
     environment:
+      - DB_HOST=${DB_HOST_WEB_1}
       - DB_USER=${DB_USER_WEB_1}
       - DB_PASSWORD=${DB_PASSWORD_WEB_1}
       - JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
@@ -58,7 +94,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - db_net
+      - db_master
       - proxy
 
   web2:
@@ -69,6 +105,7 @@ services:
     env_file:
       - src/.env
     environment:
+      - DB_HOST=${DB_HOST_WEB_2}
       - DB_USER=${DB_USER_WEB_2}
       - DB_PASSWORD=${DB_PASSWORD_WEB_2}
     expose:
@@ -79,7 +116,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      - db_net
+      - db_master
       - proxy
 
   web3:
@@ -90,6 +127,7 @@ services:
     env_file:
       - src/.env
     environment:
+      - DB_HOST=${DB_HOST_WEB_3}
       - DB_USER=${DB_USER_WEB_3}
       - DB_PASSWORD=${DB_PASSWORD_WEB_3}
     expose:
@@ -100,11 +138,33 @@ services:
       db:
         condition: service_healthy
     networks:
-      - db_net
+      - db_master
+      - proxy
+
+  web-mirror:
+    build: src/docker/web
+    volumes:
+      - ./src/code/build/libs:${APP_PATH}
+      - ./src/code/RestAPI/resources/openapi:${OPEN_API_PATH}
+    env_file:
+      - src/.env
+    environment:
+      - DB_HOST=${DB_HOST_WEB_M}
+      - DB_USER=${DB_USER_WEB_M}
+      - DB_PASSWORD=${DB_PASSWORD_WEB_M}
+    expose:
+      - ${PORT}
+    ports:
+      - ${PORT_WEB_M}:${PORT}
+    depends_on:
+      db-slave:
+        condition: service_healthy
+    networks:
+      - db_slave
       - proxy
 
   nginx:
-    image: nginx
+    image: byjg/nginx-extras
     volumes:
       - ./src/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./README.md:/docs/README.md
@@ -116,17 +176,26 @@ services:
     networks:
       - proxy
     depends_on:
-      - pgadmin
-      - web1
-      - web2
-      - web3
-
-
+      db:
+        condition: service_healthy
+      db-slave:
+        condition: service_healthy
+      pgadmin:
+        condition: service_started
+      web1:
+        condition: service_started
+      web2:
+        condition: service_started
+      web3:
+        condition: service_started
 
 volumes:
   pgadmin:
   pgdata:
+    driver: local
 
 networks:
+  db_master:
+  db_slave:
   db_net:
   proxy:
