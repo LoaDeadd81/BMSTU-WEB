@@ -171,6 +171,7 @@ services:
       - ./docs/img/:/img
       - ./src/nginx/static:/static
       - ./src/nginx/log:/var/log/nginx
+      - proxy-cache:/cache
     ports:
       - ${NGINX_PORT_OUT}:${NGINX_PORT}
     networks:
@@ -193,6 +194,7 @@ volumes:
   pgadmin:
   pgdata:
     driver: local
+  proxy-cache:
 
 networks:
   db_master:

@@ -7,6 +7,8 @@ servers:
     description: app
   - url: http://localhost:8888/mirror1/api/v1
     description: mirror
+  - url: http://localhost:8001/api/v1
+    description: main
 tags:
   - name: auth
     description: Authorisation
