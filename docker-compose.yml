@@ -78,7 +78,7 @@ services:
       - ./src/code/build/libs:${APP_PATH}
       - ./src/code/RestAPI/resources/openapi:${OPEN_API_PATH}
     env_file:
-      - src/.env
+      - .env
     environment:
       - DB_HOST=${DB_HOST_WEB_1}
       - DB_USER=${DB_USER_WEB_1}
@@ -103,7 +103,7 @@ services:
       - ./src/code/build/libs:${APP_PATH}
       - ./src/code/RestAPI/resources/openapi:${OPEN_API_PATH}
     env_file:
-      - src/.env
+      - .env
     environment:
       - DB_HOST=${DB_HOST_WEB_2}
       - DB_USER=${DB_USER_WEB_2}
@@ -125,7 +125,7 @@ services:
       - ./src/code/build/libs:${APP_PATH}
       - ./src/code/RestAPI/resources/openapi:${OPEN_API_PATH}
     env_file:
-      - src/.env
+      - .env
     environment:
       - DB_HOST=${DB_HOST_WEB_3}
       - DB_USER=${DB_USER_WEB_3}
@@ -147,7 +147,7 @@ services:
       - ./src/code/build/libs:${APP_PATH}
       - ./src/code/RestAPI/resources/openapi:${OPEN_API_PATH}
     env_file:
-      - src/.env
+      - .env
     environment:
       - DB_HOST=${DB_HOST_WEB_M}
       - DB_USER=${DB_USER_WEB_M}

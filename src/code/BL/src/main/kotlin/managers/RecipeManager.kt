@@ -36,8 +36,8 @@ object RecipeManager {
         logger.trace("{} called with parameters {}", ::read.name, id)
 
         val recipe = repository.read(id)
-        val uId = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
-        if (recipe.state != RecipeState.PUBLISHED && !UserManager.isAdmin(uId) && !isOwner(id, uId))
+        val uId = AccountService.getCurrentUserId()
+        if (recipe.state != RecipeState.PUBLISHED && uId != null && !UserManager.isAdmin(uId) && !isOwner(id, uId))
             throw AccessDeniedException("Access denied")
 
         return recipe
