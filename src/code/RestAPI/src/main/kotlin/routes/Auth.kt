@@ -41,7 +41,6 @@ fun Route.auth() {
             .withClaim("id", user.id)
             .withExpiresAt(Date(System.currentTimeMillis() + 600000))
 
-
         call.respond(hashMapOf("token" to token.sign(Algorithm.HMAC256(jwtSecret))))
     }
     post<Auth.Register> {

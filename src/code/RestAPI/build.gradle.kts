@@ -40,6 +40,7 @@ dependencies {
     implementation("io.ktor:ktor-server-double-receive:$ktor_version")
     implementation("io.ktor:ktor-server-call-id:$ktor_version")
     implementation("io.ktor:ktor-server-call-logging:$ktor_version")
+    implementation("com.apurebase:kgraphql-ktor:0.19.0")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

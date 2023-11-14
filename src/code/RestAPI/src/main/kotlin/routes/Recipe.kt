@@ -63,8 +63,9 @@ fun Route.recipes() {
             val state = req.state
 
             val uId = call.principal<JWTPrincipal>()?.payload?.getClaim("id")?.asInt()
-            if (uId != null)
+            if (uId != null) {
                 AccountService.setId(uId)
+            }
 
             val recipes = RecipeManager.getAll(userId, saved, state).map { RecipePreviewResponse(it) }
 
@@ -119,7 +120,7 @@ fun Route.recipes() {
             val id = req.parent.id
             val data = call.receive<StoreComment>()
 
-            val cId = CommentManager.create(uid, data.text, id)
+            val cId = CommentManager.create(data.text, id)
 
             val host = "http://${RestApi.host}:${RestApi.port}/api/v1"
             call.respondText("$host/comments/$cId", status = HttpStatusCode.Created)

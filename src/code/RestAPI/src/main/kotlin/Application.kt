@@ -1,5 +1,6 @@
 package api
 
+import api.plugins.configureGQL
 import api.plugins.configureLogging
 import api.plugins.configureStatusCodes
 import api.plugins.configureValidation
@@ -32,4 +33,5 @@ fun Application.module() {
     configureValidation()
     configureStatusCodes()
     configureLogging()
+    configureGQL()
 }

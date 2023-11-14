@@ -13,9 +13,14 @@ down:
 nr:
 	docker compose exec -d nginx nginx -s reload
 
-rb:
+build:
 	cd src/code && sudo ./gradlew build
+
+rb: build
 	docker compose restart --no-deps web1 web2 web3  web-mirror
+
+rb1: build
+	docker compose restart --no-deps web1
 
 clean:
 	cd src/code && sudo ./gradlew clean

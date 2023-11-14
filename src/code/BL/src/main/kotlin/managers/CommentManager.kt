@@ -17,13 +17,19 @@ object CommentManager {
         this.repository = repository
     }
 
-    fun create(userID: Int, text: String, recipeID: Int): Int {
-        logger.trace("{} called with parameters {}, {}, {}", ::create.name, userID, text, recipeID)
+    fun create(text: String, recipeID: Int): Int {
+        logger.trace("{} called with parameters {}, {}", ::create.name, text, recipeID)
 
-        AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
+        val userID = AccountService.getCurrentUserId() ?: throw NotAuthorizedException("User not authorized")
         if (!validateText(text)) throw ValidationException("Comment failed validation")
 
         return repository.create(userID, text, recipeID)
+    }
+
+    fun read(id: Int): Comment {
+        logger.trace("{} called with parameters {}", ::read.name, id)
+
+        return repository.read(id)
     }
 
     fun update(obj: Comment) {

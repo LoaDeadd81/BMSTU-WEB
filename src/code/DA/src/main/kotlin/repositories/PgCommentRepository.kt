@@ -2,10 +2,7 @@ package da.repositories
 
 import bl.entities.Comment
 import bl.repositories.ICommentRepository
-import da.dao.CommentTable
-import da.dao.Recipes
-import da.dao.Users
-import da.dao.toEntity
+import da.dao.*
 import da.exeption.NotFoundException
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -40,6 +37,14 @@ class PgCommentRepository : ICommentRepository {
             dao.text = obj.text
             dao.autorId = EntityID(obj.autor.id, Users)
         }
+    }
+
+    override fun read(id: Int): Comment {
+        val dao = transaction {
+            CommentTable.findById(id)?.toEntity() ?: throw NotFoundException("Comment with id = $id not found")
+        }
+
+        return dao
     }
 
     override fun delete(id: Int) {
