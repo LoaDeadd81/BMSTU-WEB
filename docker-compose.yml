@@ -24,55 +24,8 @@ services:
       start_period: 5s
     networks:
       - db_master
-      - db_net
 
-  db-slave:
-    image: bitnami/postgresql
-    environment:
-      POSTGRESQL_PASSWORD: ${DB_PASSWORD_OUT}
-      POSTGRESQL_MASTER_HOST: db
-      POSTGRESQL_PGAUDIT_LOG: READ
-      POSTGRESQL_LOG_HOSTNAME: true
-      POSTGRESQL_REPLICATION_MODE: slave
-      POSTGRESQL_REPLICATION_USER: ${PG_REPL_USER}
-      POSTGRESQL_REPLICATION_PASSWORD: ${PG_REPL_PASS}
-      POSTGRESQL_MASTER_PORT_NUMBER: 5432
-      ALLOW_EMPTY_PASSWORD: yes
-    ports:
-      - "${PG_SLAVE_PORT_OUT}:5432"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER_OUT} -d ${DB_NAME}" ]
-      interval: 3s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - db_net
-      - db_slave
-
-
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PG_ADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PG_ADMIN_PASS}
-    ports:
-      - "${PG_ADMIN_PORT}:80"
-    depends_on:
-      db:
-        condition: service_healthy
-      db-slave:
-        condition: service_healthy
-    volumes:
-      - pgadmin:${PG_ADMIN_DATA}
-    networks:
-      - db_master
-      - proxy
-
-  web1:
+  web:
     build: src/docker/web
     volumes:
       - ./src/code/build/libs:${APP_PATH}
@@ -85,8 +38,8 @@ services:
       - DB_PASSWORD=${DB_PASSWORD_WEB_1}
       - JAVA_TOOL_OPTIONS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     expose:
-      - ${PORT}
-      - 5005
+      - "${PORT}"
+      - "5005"
     ports:
       - ${PORT_WEB_1}:${PORT}
       - "5005:5005"
@@ -97,72 +50,6 @@ services:
       - db_master
       - proxy
 
-  web2:
-    build: src/docker/web
-    volumes:
-      - ./src/code/build/libs:${APP_PATH}
-      - ./src/code/RestAPI/resources/openapi:${OPEN_API_PATH}
-    env_file:
-      - .env
-    environment:
-      - DB_HOST=${DB_HOST_WEB_2}
-      - DB_USER=${DB_USER_WEB_2}
-      - DB_PASSWORD=${DB_PASSWORD_WEB_2}
-    expose:
-      - ${PORT}
-    ports:
-      - ${PORT_WEB_2}:${PORT}
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - db_master
-      - proxy
-
-  web3:
-    build: src/docker/web
-    volumes:
-      - ./src/code/build/libs:${APP_PATH}
-      - ./src/code/RestAPI/resources/openapi:${OPEN_API_PATH}
-    env_file:
-      - .env
-    environment:
-      - DB_HOST=${DB_HOST_WEB_3}
-      - DB_USER=${DB_USER_WEB_3}
-      - DB_PASSWORD=${DB_PASSWORD_WEB_3}
-    expose:
-      - ${PORT}
-    ports:
-      - ${PORT_WEB_3}:${PORT}
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - db_master
-      - proxy
-
-  web-mirror:
-    build: src/docker/web
-    volumes:
-      - ./src/code/build/libs:${APP_PATH}
-      - ./src/code/RestAPI/resources/openapi:${OPEN_API_PATH}
-    env_file:
-      - .env
-    environment:
-      - DB_HOST=${DB_HOST_WEB_M}
-      - DB_USER=${DB_USER_WEB_M}
-      - DB_PASSWORD=${DB_PASSWORD_WEB_M}
-    expose:
-      - ${PORT}
-    ports:
-      - ${PORT_WEB_M}:${PORT}
-    depends_on:
-      db-slave:
-        condition: service_healthy
-    networks:
-      - db_slave
-      - proxy
-
   nginx:
     image: byjg/nginx-extras
     volumes:
@@ -171,7 +58,7 @@ services:
       - ./docs/img/:/img
       - ./src/nginx/static:/static
       - ./src/nginx/log:/var/log/nginx
-      - proxy-cache:/cache
+      - ./src/nginx/ssl:/etc/nginx/ssl
     ports:
       - ${NGINX_PORT_OUT}:${NGINX_PORT}
     networks:
@@ -179,25 +66,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      db-slave:
-        condition: service_healthy
-      pgadmin:
-        condition: service_started
-      web1:
-        condition: service_started
-      web2:
-        condition: service_started
-      web3:
+      web:
         condition: service_started
 
 volumes:
-  pgadmin:
   pgdata:
     driver: local
   proxy-cache:
 
 networks:
   db_master:
-  db_slave:
-  db_net:
   proxy:
