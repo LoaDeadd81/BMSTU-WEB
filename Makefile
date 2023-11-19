@@ -22,5 +22,8 @@ rb: build
 rb1: build
 	docker compose restart --no-deps web1
 
+curl:
+	docker compose restart --no-deps curl
+
 clean:
 	cd src/code && sudo ./gradlew clean
