@@ -3,10 +3,7 @@ package api.plugins
 import api.dto.requests.comment.StoreComment
 import api.dto.requests.comment.UpdateComment
 import api.dto.requests.ingredients.IngredientRequest
-import api.dto.requests.recipe.StoreRecipe
-import api.dto.requests.recipe.UpdateRecipe
-import api.dto.requests.recipe.UpdateRecipeInfo
-import api.dto.requests.recipe.UpdateRecipeStages
+import api.dto.requests.recipe.*
 import api.dto.requests.user.UpdateUser
 import api.dto.requests.user.UserCredentials
 import api.dto.responces.ingredients.IngredientResponse
@@ -39,9 +36,46 @@ fun Application.configureGQL() {
         playground = true
         endpoint = "/api/v2"
 
+
+//        mutation{
+//            logIn(data:{login:"login1", password:"password1"}){
+//            token
+//        }
+//        }
+
 //        {
 //            "Authorization": "Bearer YOUR_TOKEN_HERE"
 //        }
+
+//        mutation{
+//            createComment(id:1, data:{text:"lalala"}){
+//            id
+//            autor{
+//                id
+//                login
+//            }
+//            date
+//            text
+//        }
+//        }
+
+//        query{
+//            recipe(id:1){
+//            id
+//            name
+//            comments{
+//                id
+//                autor{
+//                    id
+//                    login
+//                }
+//                date
+//                text
+//            }
+//        }
+//        }
+
+
         wrap {
             authenticate("auth", optional = true, build = it)
         }
@@ -191,20 +225,34 @@ fun Application.configureGQL() {
                     recipe
                 }
             }
-            mutation("updateRecipeInfo") {
-                resolver { id: Int, data: UpdateRecipeInfo, ctx: Context ->
+            mutation("PatchRecipe") {
+                resolver { id: Int, data: PatchRecipe, ctx: Context ->
                     AccountService.setId(getId(ctx.get<ApplicationCall>()!!))
 
-                    RecipeResponse(RecipeManager.updateInfo(data.toBLEntity(id)))
-                }
-            }
-            mutation("updateRecipeStages") {
-                resolver { id: Int, data: UpdateRecipeStages, ctx: Context ->
-                    AccountService.setId(getId(ctx.get<ApplicationCall>()!!))
+                    if(data.info != null) {
+                        RecipeManager.updateInfo(data.info.toBLEntity(id))
+                    }
+                    if(data.stages != null){
+                        RecipeManager.updateStages(id, data.stages.toBLEntity())
+                    }
 
-                    RecipeResponse(RecipeManager.updateStages(id, data.toBLEntity()))
+                    RecipeResponse(RecipeManager.read(id))
                 }
             }
+//            mutation("updateRecipeInfo") {
+//                resolver { id: Int, data: UpdateRecipeInfo, ctx: Context ->
+//                    AccountService.setId(getId(ctx.get<ApplicationCall>()!!))
+//
+//                    RecipeResponse(RecipeManager.updateInfo(data.toBLEntity(id)))
+//                }
+//            }
+//            mutation("updateRecipeStages") {
+//                resolver { id: Int, data: UpdateRecipeStages, ctx: Context ->
+//                    AccountService.setId(getId(ctx.get<ApplicationCall>()!!))
+//
+//                    RecipeResponse(RecipeManager.updateStages(id, data.toBLEntity()))
+//                }
+//            }
             mutation("createComment") {
                 resolver { id: Int, data: StoreComment, ctx: Context ->
                     AccountService.setId(getId(ctx.get<ApplicationCall>()!!))

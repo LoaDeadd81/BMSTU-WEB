@@ -82,7 +82,7 @@ services:
     depends_on:
       nginx:
         condition: service_started
-    command:  curl -ILk https://192.20.0.3:8443 --http3 #нужен недостижимый ip, чтоб образ сразу не лёг после завершении
+    command:  curl -ILk https://192.20.0.3:8443 --http3
     # команда внутри  curl -ILk --http3 https://nginx:8443
     # curl -k -D - --http3 https://nginx:8443/api/v1/users
 

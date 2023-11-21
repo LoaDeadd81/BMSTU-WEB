@@ -20,7 +20,7 @@ rb: build
 	docker compose restart --no-deps web1 web2 web3  web-mirror
 
 rb1: build
-	docker compose restart --no-deps web1
+	docker compose restart --no-deps web
 
 curl:
 	docker compose restart --no-deps curl

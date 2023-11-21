@@ -1,0 +1,234 @@
+#
+type UserResponse {
+  id: Int!
+  isAdmin: Boolean!
+  login: String!
+}
+
+#
+type FullUserResponse {
+  id: Int!
+  isAdmin: Boolean!
+  login: String!
+  recipes: [RecipePreviewResponse!]!
+}
+
+#
+type RecipePreviewResponse {
+  date: LocalDateTime!
+  description: String!
+  id: Int!
+  name: String!
+  pfc: PFCResponse!
+  servingsNum: Int!
+  time: Int!
+}
+
+#
+type PFCResponse {
+  carbon: Int!
+  fat: Int!
+  protein: Int!
+}
+
+#
+type RecipeResponse {
+  comments: [CommentResponse!]!
+  date: LocalDateTime!
+  description: String!
+  id: Int!
+  ingredients: [IngredientInStageResponse!]!
+  name: String!
+  owner: UserResponse!
+  pfc: PFCResponse!
+  servingsNum: Int!
+  stages: [StageResponse!]!
+  state: RecipeState!
+  time: Int!
+}
+
+#
+type CommentResponse {
+  autor: UserResponse!
+  date: LocalDateTime!
+  id: Int!
+  text: String!
+}
+
+#
+type IngredientInStageResponse {
+  amount: Int!
+  id: Int!
+  name: String!
+  nutritionalValue: Int!
+  processingType: ProcessingType!
+  type: IngredientType!
+}
+
+#
+type StageResponse {
+  description: String!
+  id: Int!
+  ingredients: [IngredientInStageResponse!]!
+  time: Int!
+}
+
+#
+type IngredientResponse {
+  id: Int!
+  name: String!
+  nutritionalValue: Int!
+  type: IngredientType!
+}
+
+#
+type Token {
+  token: String!
+}
+
+#
+input UserCredentials {
+  login: String!
+  password: String!
+}
+
+#
+input UpdateUser {
+  isAdmin: Boolean!
+  login: String!
+  password: String!
+}
+
+#
+input StoreRecipe {
+  description: String!
+  name: String!
+  pfc: PFC!
+  servingsNum: Int!
+  stages: [StoreStage!]!
+  time: Int!
+}
+
+#
+input PFC {
+  carbon: Int!
+  fat: Int!
+  protein: Int!
+}
+
+#
+input StoreStage {
+  description: String!
+  ingredients: [StoreIngredientInStage!]!
+  time: Int!
+}
+
+#
+input StoreIngredientInStage {
+  amount: Int!
+  id: Int!
+  processingType: ProcessingType!
+}
+
+#
+input UpdateRecipe {
+  date: LocalDateTime!
+  description: String!
+  name: String!
+  owner_id: Int!
+  pfc: PFC!
+  servingsNum: Int!
+  stages: [StoreStage!]!
+  state: RecipeState!
+  time: Int!
+}
+
+#
+input PatchRecipe {
+  info: UpdateRecipeInfo
+  stages: UpdateRecipeStages
+}
+
+#
+input UpdateRecipeInfo {
+  description: String!
+  name: String!
+  pfc: PFC!
+  servingsNum: Int!
+  state: RecipeState!
+  time: Int!
+}
+
+#
+input UpdateRecipeStages {
+  stages: [StoreStage!]!
+}
+
+#
+input StoreComment {
+  text: String!
+}
+
+#
+input UpdateComment {
+  date: LocalDateTime!
+  text: String!
+  user_id: Int!
+}
+
+#
+input IngredientRequest {
+  name: String!
+  nutritionalValue: Int!
+  type: IngredientType!
+}
+
+# The Short scalar type represents a signed 16-bit numeric non-fractional value
+scalar Short
+
+# The Long scalar type represents a signed 64-bit numeric non-fractional value
+scalar Long
+
+#
+scalar LocalDateTime
+
+#
+scalar ProcessingType
+
+#
+scalar IngredientType
+
+#
+scalar RecipeState
+
+# Query object
+type Query {
+  users: [UserResponse!]!
+  user(id: Int!): FullUserResponse!
+  recipes(userId: Int, saved: Boolean, state: String): [RecipePreviewResponse!]!
+  recipe(id: Int!): RecipeResponse!
+  ingredients(name: String): [IngredientResponse!]!
+  ingredient(id: Int!): IngredientResponse!
+}
+
+# Mutation object
+type Mutation {
+  logIn(data: UserCredentials!): Token!
+  createUser(data: UserCredentials!): UserResponse!
+  updateUser(id: Int!, data: UpdateUser!): UserResponse!
+  deleteUser(id: Int!): UserResponse!
+  updateCredentials(id: Int!, data: UserCredentials!): UserResponse!
+  saveRecipe(userId: Int!, recipeId: Int!): [RecipePreviewResponse!]!
+  delSaveRecipe(userId: Int!, recipeId: Int!): [RecipePreviewResponse!]!
+  createRecipe(data: StoreRecipe!): RecipeResponse!
+  updateRecipe(id: Int!, data: UpdateRecipe!): RecipeResponse!
+  deleteRecipe(id: Int!): RecipeResponse!
+  PatchRecipe(id: Int!, data: PatchRecipe!): RecipeResponse!
+  createComment(id: Int!, data: StoreComment!): CommentResponse!
+  updateComment(id: Int!, data: UpdateComment!): CommentResponse!
+  deleteComment(id: Int!): CommentResponse!
+  updateCommentText(id: Int!, data: StoreComment!): CommentResponse!
+  createIngredient(data: IngredientRequest!): IngredientResponse!
+  updateIngredient(id: Int!, data: IngredientRequest!): IngredientResponse!
+  deleteIngredient(id: Int!): IngredientResponse!
+}

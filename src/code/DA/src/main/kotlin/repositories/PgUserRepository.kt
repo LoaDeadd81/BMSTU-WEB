@@ -139,7 +139,7 @@ class PgUserRepository : IUserRepository {
 
         return transaction {
             UserTable.find { Users.login eq login }.firstOrNull()?.toEntity()
-                ?: throw NotFoundException("User with id = $id not found")
+                ?: throw NotFoundException("User with login = $login not found")
         }
     }
 
